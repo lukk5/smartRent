@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "smartRent.BackEnd", "smartRent.BackEnd\smartRent.BackEnd.csproj", "{91F306CE-3588-4F4B-B48F-0F9FB3BB968E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "smartRent.Repo", "smartRent.Repo\smartRent.Repo.csproj", "{1786AE44-3BBA-4218-A078-D7A1F3F18033}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91F306CE-3588-4F4B-B48F-0F9FB3BB968E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91F306CE-3588-4F4B-B48F-0F9FB3BB968E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91F306CE-3588-4F4B-B48F-0F9FB3BB968E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91F306CE-3588-4F4B-B48F-0F9FB3BB968E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1786AE44-3BBA-4218-A078-D7A1F3F18033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1786AE44-3BBA-4218-A078-D7A1F3F18033}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1786AE44-3BBA-4218-A078-D7A1F3F18033}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1786AE44-3BBA-4218-A078-D7A1F3F18033}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
