@@ -24,7 +24,9 @@ public class UserController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IAuthService _authService;
 
-    public UserController(IMapper mapper, IBaseRepository<Credentials> credRepository, IBaseRepository<LandLord> landLordRepo, IBaseRepository<Tenant> tenantRepo, IUserRepository userRepository, IAuthService authService)
+    public UserController(IMapper mapper, IBaseRepository<Credentials> credRepository,
+        IBaseRepository<LandLord> landLordRepo, IBaseRepository<Tenant> tenantRepo, IUserRepository userRepository,
+        IAuthService authService)
     {
         _credRepository = credRepository;
         _landLordRepo = landLordRepo;
@@ -45,14 +47,14 @@ public class UserController : ControllerBase
             var landLords = await _landLordRepo.GetAllAsync();
 
             var users = new List<User>();
-            
+
             users.AddRange(tenants);
             users.AddRange(landLords);
-            
+
             if (userRegViewModel.NickName is not null && userRegViewModel.NickName != string.Empty)
             {
                 var credentials = await _credRepository.GetAllAsync();
-                
+
                 if (credentials.SingleOrDefault(x => x.NickName == userRegViewModel.NickName) is not null)
                 {
                     validationResult.Add(new ValidationResult()
@@ -96,11 +98,12 @@ public class UserController : ControllerBase
             if (currentCred is null)
                 return NoContent();
 
-            if (!VerifyHashedPassword(userLogLogin.NickName,currentCred.Password,userLogLogin.Password)) return Unauthorized();
+            if (!VerifyHashedPassword(userLogLogin.NickName, currentCred.Password, userLogLogin.Password))
+                return Unauthorized();
 
             User user = null;
             var type = "";
-            
+
             var tenant = await _tenantRepo.GetByIdAsync(currentCred.UserId);
             var landLord = await _landLordRepo.GetByIdAsync(currentCred.UserId);
 
@@ -124,9 +127,8 @@ public class UserController : ControllerBase
             var auth = _authService.GetAuthData(user.Id.ToString());
 
             auth.UserType = type;
-            
-            return Ok(auth);
 
+            return Ok(auth);
         }
         catch (Exception e)
         {
@@ -197,22 +199,97 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("get/{id}/{landLord}")]
+    [HttpPut]
+    [Route("updatePassword")]
     [Authorize]
-    public async Task<IActionResult> GetUser([FromRoute] string id, [FromRoute] bool landLord)
+    public async Task<IActionResult> UpdateUserPassword([FromBody] UserPasswordViewModel userPasswordViewModel)
     {
-        User user;
+        var credAll = await _credRepository.GetAllAsync();
 
-        if (landLord)
+        var currentCred = credAll.SingleOrDefault(x => x.UserId == Guid.Parse(userPasswordViewModel.Id));
+
+        if (currentCred is null)
+            return NoContent();
+
+        currentCred.Password = HashPassword(currentCred.NickName, userPasswordViewModel.Password);
+
+        await _credRepository.UpdateAsync(currentCred);
+
+        return Ok();
+    }
+
+    [HttpPost]
+    [Route("checkOldPassword")]
+    [Authorize]
+    public async Task<IActionResult> CheckOldPassword([FromBody] UserPasswordViewModel userPasswordViewModel)
+    {
+        var credAll = await _credRepository.GetAllAsync();
+        var cred = credAll.SingleOrDefault(x => x.UserId == Guid.Parse(userPasswordViewModel.Id));
+
+        if (cred is null)
+            return NoContent();
+
+        var result = VerifyHashedPassword(cred.NickName, cred.Password, userPasswordViewModel.Password);
+
+        return Ok(result);
+    }
+
+    [HttpPut]
+    [Route("updateContactDetail")]
+    [Authorize]
+    public async Task<IActionResult> UpdateContactDetail([FromBody] UserContactViewModel userContactViewModel)
+    {
+        Tenant tenant = null;
+        LandLord landLord = null;
+        UserDTO userDto = null;
+
+        if (userContactViewModel.Type == "landLord")
         {
-            user = await _landLordRepo.GetByIdAsync(Guid.Parse(id));
+            landLord = await _landLordRepo.GetByIdAsync(Guid.Parse(userContactViewModel.Id));
         }
         else
         {
-            user = await _tenantRepo.GetByIdAsync(Guid.Parse(id));
+            tenant = await _tenantRepo.GetByIdAsync(Guid.Parse(userContactViewModel.Id));
         }
 
+        if (tenant is null && landLord is null)
+            return NoContent();
+
+        if (userContactViewModel.Type == "landLord" && landLord is not null)
+        {
+            if (userContactViewModel.Email is not null)
+                landLord.Email = userContactViewModel.Email;
+
+            if (userContactViewModel.Phone is not null)
+                landLord.Phone = userContactViewModel.Phone;
+            await _landLordRepo.UpdateAsync(landLord);
+
+            userDto = _mapper.Map<User, UserDTO>(landLord);
+            userDto.UserType = "landLord";
+        }
+        else if (tenant is not null)
+        {
+            if (userContactViewModel.Email != "")
+                tenant.Email = userContactViewModel.Email;
+
+            if (userContactViewModel.Phone != "")
+                tenant.Phone = userContactViewModel.Phone;
+            await _tenantRepo.UpdateAsync(tenant);
+
+            userDto = _mapper.Map<User, UserDTO>(tenant);
+            userDto.UserType = "tenant";
+        }
+
+        return Ok(userDto);
+    }
+
+    [HttpGet]
+    [Route("get/{id}")]
+    [Authorize]
+    public async Task<IActionResult> GetUser([FromRoute] string id, [FromRoute] bool landLord)
+    {
+        var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ?? (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
+        
         if (user is null) return NotFound();
 
         return Ok(_mapper.Map<User, UserDTO>(user));

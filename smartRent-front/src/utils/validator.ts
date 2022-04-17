@@ -26,10 +26,13 @@ export const isPhone = (phone: string): boolean => {
 
   let result = phoneReg.test(phone);
 
+
   if(phone.length > 12 || phone.length < 9)
   {
       result = false;
   } 
+
+  console.log(result);
 
   return result;
 };

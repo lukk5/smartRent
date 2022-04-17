@@ -15,19 +15,23 @@ import {
 } from "@mui/material";
 import logo from "../image/smartRent.png";
 import "../image/logo.css";
-import { isEmail, isPassword, isPasswordMatch, isPhone } from "../utils/validator";
+import {
+  isEmail,
+  isPassword,
+  isPasswordMatch,
+  isPhone,
+} from "../utils/validator";
 
 const SignOnForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [canSubmit, setCanSubmit] = useState<boolean>(false);
-  const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
   const [repeatPassword, setRepeatPassword] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [userType, setUserType] = useState<string>("");
+  const [regOccur, setRegOccur] = useState<boolean>(false);
   const [regError, setRegError] = useState<boolean>(false);
   const [nickNameError, setNickNameError] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
@@ -41,8 +45,6 @@ const SignOnForm: React.FC = () => {
   const [phoneHasError, setPhoneHasError] = useState<boolean>(false);
   const [emailHasError, setEmailHasError] = useState<boolean>(false);
   const [passwordHasError, setPasswordHasError] = useState<boolean>(false);
-  const [userTypeHasError, setUserTypeHasError] = useState<boolean>(false);
-  const [userTypeError, setUserTypeError] = useState<string>("");
 
   const onChangeField = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,47 +81,85 @@ const SignOnForm: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const onClickButton = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      switch (event.currentTarget.name) {
-        case "visible_password":
-          setVisiblePassword(!visiblePassword);
-          break;
-      }
-    },
-    [visiblePassword]
-  );
+  const submitReg = async () => {
+    try {
+      console.log("sad");
+      if (!validateSubmit()) return;
 
-  useEffect(() => {
-    (async () => {
-      if (canSubmit) {
-        try {
-          const isLandLord: boolean = userType === "LandLord";
+      const isLandLord: boolean = userType === "landLord";
 
-          const user: RegisterUserBody = {
-            nickName: username,
-            password: password,
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-            isLandLord: isLandLord,
-          };
+      const user: RegisterUserBody = {
+        nickName: username,
+        password: password,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        isLandLord: isLandLord,
+      };
+      setRegOccur(true);
 
-          await register(user);
-          setEmail("");
-          setPassword("");
-          setCanSubmit(false);
-        } catch (error) {
-          setCanSubmit(false);
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSubmit]);
+      await register(user);
+
+      setRegError(false);
+
+      await timeout(4000);
+      goBack();
+    } catch (error) {
+      setRegError(true);
+      await timeout(4000);
+      setRegOccur(false);
+      setRegError(false);
+    }
+  };
+
+  function timeout(delay: number) {
+    return new Promise((res) => setTimeout(res, delay));
+  }
 
   const goBack = () => {
     navigate("/");
+  };
+
+  const validateSubmit = (): boolean => {
+    let result = true;
+
+    if (username === "") {
+      setNickNameHasError(true);
+      setNickNameError("Laukas negali būti tuščias");
+      result = false;
+    }
+
+    if (firstName === "") {
+      setFirstNameHasError(true);
+      setNameError("Laukas negali būti tuščias.");
+      result = false;
+    }
+
+    if (lastName === "") {
+      setLastNameHasError(true);
+      setLastNameError("Laukas negali būti tuščias.");
+      result = false;
+    }
+
+    if (phone === "") {
+      setPhoneHasError(true);
+      setPhoneError("Laukas negali būti tuščias.");
+      result = false;
+    }
+
+    if (email === "") {
+      setEmailHasError(true);
+      setEmailError("Laukas negali būti tuščias.");
+      result = false;
+    }
+
+    if (password === "") {
+      setPasswordHasError(true);
+      setPasswordError("Laukas negali būti tuščias.");
+      result = false;
+    }
+    return result;
   };
 
   const validate = (property: string) => {
@@ -137,85 +177,55 @@ const SignOnForm: React.FC = () => {
 
         break;
       case "password":
-
-        if(password !== "")
-        {
-          if(!isPassword(password))
-          {
+        if (password !== "") {
+          if (!isPassword(password)) {
             setPasswordHasError(true);
-            setPasswordError("Blogai įvestas slaptažodis. Slaptažodis turi būti nuo 6 iki 20 simbolių ir turėti bent 1 raidę, skaičių ir simbolį.")
+            setPasswordError(
+              "Blogai įvestas slaptažodis. Slaptažodis turi būti nuo 6 iki 20 simbolių ir turėti bent 1 raidę, skaičių ir simbolį."
+            );
           }
         } else {
-            setPasswordHasError(false);
-            setPasswordError("");
+          setPasswordHasError(false);
+          setPasswordError("");
         }
         break;
       case "nickname":
-        if(username === "") {
-          setNickNameError("Laukas negali būti tuščias.");
-          setNickNameHasError(true);
-        }
+        setNickNameError("");
+        setNickNameHasError(false);
+
         break;
       case "repeatpassword":
-
-        if(repeatPassword !== "")
-        {
-          if(!isPasswordMatch(password, repeatPassword))
-          {
+        if (repeatPassword !== "") {
+          if (!isPasswordMatch(password, repeatPassword)) {
             setPasswordHasError(true);
             setPasswordError("Nesutampa slaptažodžiai.");
           }
-        } 
+        }
 
         break;
       case "lastName":
-        if(lastName === "") {
-          setLastNameError("Pavardė negali būti tuščias.");
-          setLastNameHasError(true);
-        }
+        setLastNameError("");
+        setLastNameHasError(false);
+
         break;
       case "firstName":
-        if(firstName === "") {
-          setNameError("Vardas negali būti tuščias.");
-          setFirstNameHasError(true);
-        }
+        setNameError("");
+        setFirstNameHasError(false);
+
         break;
       case "phone":
-        if(phone !== "")
-        {
-          if(!isPhone(phone))
-          {
+        if (phone !== "") {
+          if (!isPhone(phone)) {
             setPhoneHasError(true);
-            setPhoneError("Blogai įvestas telefono numeris.")
+            setPhoneError("Blogai įvestas telefono numeris.");
           }
         } else {
-            setPhoneHasError(false);
-            setPhoneError("");
+          setPhoneHasError(false);
+          setPhoneError("");
         }
-        break;
-        case "userType":
-        
-        if(userType === "")
-        {
-            setUserTypeHasError(true);
-            setUserTypeError("Būtina pasirinkti tipą.");
-        }
-
         break;
     }
   };
-
-  const handleSubmit = async () => {
-    if (regError) {
-      setCanSubmit(false);
-      return;
-    }
-    setCanSubmit(true);
-  };
-
-  setTimeout(() => {
-    setRegError(false);
-  }, 200);
 
   return (
     <Box>
@@ -238,8 +248,13 @@ const SignOnForm: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={8} md={4}>
-              {regError ? (
+              {regError === true && regOccur === true ? (
                 <Alert severity="error">Registracija nesėkminga</Alert>
+              ) : (
+                <></>
+              )}
+              {regError === false && regOccur === true? (
+                <Alert severity="success">Registracija sėkminga</Alert>
               ) : (
                 <></>
               )}
@@ -310,29 +325,35 @@ const SignOnForm: React.FC = () => {
                 onChange={onChangeField}
                 error={phoneHasError}
                 helperText={phoneError}
-                onBlur={()=> { validate("phone"); }}
+                onBlur={() => {
+                  validate("phone");
+                }}
               />
             </Grid>
             <Grid item xs={6} md={4}>
               <TextField
                 name="password"
                 placeholder="Slaptažodis"
-                type={visiblePassword ? "text" : "password"}
+                type={"password"}
                 value={password}
                 onChange={onChangeField}
                 error={passwordHasError}
                 helperText={passwordError}
-                onBlur={()=> { validate("password"); }}
+                onBlur={() => {
+                  validate("password");
+                }}
               />
             </Grid>
             <Grid item xs={6} md={4}>
               <TextField
                 name="repeatpassword"
                 placeholder="Pakartoti slaptažodį"
-                type={visiblePassword ? "text" : "password"}
+                type={"password"}
                 value={repeatPassword}
                 onChange={onChangeField}
-                onBlur={()=> { validate("repeatpassword"); }}
+                onBlur={() => {
+                  validate("repeatpassword");
+                }}
               />
             </Grid>
             <Grid item xs={6} md={4}>
@@ -354,12 +375,20 @@ const SignOnForm: React.FC = () => {
               </FormControl>
             </Grid>
             <Grid item xs={6} md={4}>
-              <Button variant="contained" onClick={handleSubmit}>
+              <Button
+                variant="contained"
+                onClick={submitReg}
+                style={{ width: 150 }}
+              >
                 REGISTRUOTIS
               </Button>
             </Grid>
             <Grid item xs={6} md={4}>
-              <Button variant="contained" onClick={goBack}>
+              <Button
+                variant="contained"
+                onClick={goBack}
+                style={{ width: 150 }}
+              >
                 ATGAL
               </Button>
             </Grid>

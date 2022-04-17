@@ -59,7 +59,7 @@ async function logOut(): Promise<boolean> {
   return true;
 }
 
-async function register(user: RegisterUserBody): Promise<UserAuthResponse> {
+async function register(user: RegisterUserBody) {
   const response = await unfetch("http://localhost:27604/api/user/register", {
     method: "POST",
     headers: {
@@ -68,11 +68,10 @@ async function register(user: RegisterUserBody): Promise<UserAuthResponse> {
     body: JSON.stringify(user),
   });
 
-  const data = await response.json();
+  const data = await response;
 
-  if (response.status !== 200) throw new Error(data.error);
+  if (data.status !== 200) throw new Error("Registration wont work.");
 
-  return data as UserAuthResponse;
 }
 
 export { authenticate, register, logOut, validateInDB };

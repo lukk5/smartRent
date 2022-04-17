@@ -1,3 +1,4 @@
+import { string } from "yup";
 import { UserAuthResponse } from "./userAuthModel";
 
 export type User = {
@@ -12,10 +13,26 @@ export type User = {
 
 export interface UserProp {
   user : User | undefined;
+  updateLoginSucces: ()=> void;
+  updateUser?: (user: User) => void;
+  logOut?: ()=> void;
 };
 
 export interface LoginProp {
   setUser: (user: User) => void;
   cacheUser: (user: User) => void;
   cacheToken: (auth: UserAuthResponse) => void;
+  loginSuccess : () => void;
+}
+
+export type UserContactDetails = {
+  phone: string;
+  email: string;
+  id?: string;
+  type?: string;
+}
+
+export type UserPassword = {
+  password: string;
+  id?: string;
 }

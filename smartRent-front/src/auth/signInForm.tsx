@@ -6,15 +6,13 @@ import { User, LoginProp } from "../models/userModel";
 import logo from "../image/smartRent.png";
 import "../image/logo.css";
 import { Button, TextField, Box, Grid, Alert } from "@mui/material";
-import  getUserById  from "../service/userService";
+import { getUserById } from "../service/userService";
 
 const SignInForm: React.FC<LoginProp> = (props) => {
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [canSubmit, setCanSubmit] = useState<boolean>(false);
-  const [loginError, setLoginError] = useState<boolean>(false);
-  const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
   const [loginSuccess, setLoginSuccess] = useState<boolean>(false);
+  const [loginOccur, setLoginOccur] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -36,81 +34,65 @@ const SignInForm: React.FC<LoginProp> = (props) => {
     navigate("/signOn");
   };
 
-  const onClickButton = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      switch (event.currentTarget.name) {
-        case "visible_password":
-          setVisiblePassword(!visiblePassword);
-          break;
-      }
-    },
-    [visiblePassword]
-  );
-
   function timeout(delay: number) {
     return new Promise((res) => setTimeout(res, delay));
   }
 
   const moveToDashBoard = () => {
-    navigate("/dashBoard");
+    navigate("/home");
   };
 
-  const getUser = async (userId: string, landLord: boolean) : Promise<User | null> => {
-      return await getUserById(userId,landLord);
+  const getUser = async (userId: string): Promise<User | null> => {
+    return await getUserById(userId);
   };
 
+  const loginSubmit = async () => {
 
-  setTimeout(() => {
-    setLoginError(false)
-  }, 5000);
+    setLoginOccur(true);
 
-  useEffect(() => {
-    (async () => {
-      if (canSubmit) {
-        try {
+    try {
+      const loginUser: LoginUserBody = {
+        nickName: userName,
+        password: password,
+      };
 
-          const loginUser: LoginUserBody = {
-            nickName: userName,
-            password: password,
-          };
+      const response = await authenticate(loginUser);
 
-          const response = await authenticate(loginUser);
+      props.cacheToken(response);
 
-          props.cacheToken(response);
+      const user = await getUser(response.id);
 
-          setCanSubmit(false);
-          setLoginSuccess(true);
-
-          const user = await getUser(response.id, response.userType === "landLord");
-
-          if(user === null)
-          {
-            throw new Error("user not exists.");
-          }
-
-          props.cacheUser(user);
-          await timeout(1000);
-
-          moveToDashBoard();
-        } catch (error: any) {
-          setCanSubmit(false);
-          setLoginError(true);
-          setLoginSuccess(false);
-        }
+      if (user === null) {
+        throw new Error("user not exists.");
       }
-    })();
-  }, [canSubmit, userName, password]);
 
+      setLoginSuccess(true);
+
+      await timeout(3000);
+      
+      props.cacheUser(user);
+      props.loginSuccess();
+
+      moveToDashBoard();
+    } catch (error: any) {
+
+      setLoginSuccess(false);
+
+      await timeout(4000);
+
+      setLoginOccur(false);
+    }
+  };
 
   return (
-    <Box>
+    <Box sx = {{ maxHeight: "100%" }}>
       <Grid
         container
         spacing={0}
         direction="column"
         alignItems="center"
         justifyContent="center"
-        style={{ minHeight: "100vh" }}
+        style={{ maxHeight: "100%" }}
       >
         <Grid item xs={3}>
           <img src={logo} className="center" alt="logo" />
@@ -122,16 +104,6 @@ const SignInForm: React.FC<LoginProp> = (props) => {
             justifyContent="center"
             alignItems="center"
           >
-            <Grid item xs={8} md={2}>
-              {loginError ? (
-                <Alert severity="error">Prisijungimas nesėkmingas</Alert>
-              ) : (
-                <></>
-              )}
-              {loginSuccess ? (
-                <Alert severity="success">Prisijungimas sėkmingas</Alert>
-              ) : ( <></>)}
-            </Grid>
             <Grid item xs={6} md={4}>
               <TextField
                 name="nickName"
@@ -146,7 +118,7 @@ const SignInForm: React.FC<LoginProp> = (props) => {
               <TextField
                 name="password"
                 placeholder="Slaptažodis"
-                type={visiblePassword ? "text" : "password"}
+                type={"password"}
                 value={password}
                 onChange={onChangeField}
                 variant="outlined"
@@ -156,21 +128,34 @@ const SignInForm: React.FC<LoginProp> = (props) => {
               <Button
                 variant="contained"
                 type="submit"
-                onClick={() => {
-                  setCanSubmit(true);
-                }}
+                onClick={loginSubmit}
+                style={{ width: 150 }}
               >
                 Prisijungti
               </Button>
             </Grid>
             <Grid item xs={6} md={4}>
-              <Button variant="contained" onClick={openRegForm}>
+              <Button
+                variant="contained"
+                onClick={openRegForm}
+                style={{ width: 150 }}
+              >
                 Registracija
               </Button>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
+      {loginOccur === true && loginSuccess === false ? (
+        <Alert sx={{marginTop: 40 }} severity="error">Prisijungimas nesėkmingas</Alert>
+      ) : (
+        <></>
+      )}
+      {loginOccur === true && loginSuccess === true ? (
+        <Alert sx={{marginTop: 40 }} severity="success">Prisijungimas sėkmingas</Alert>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };
