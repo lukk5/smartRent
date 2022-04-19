@@ -9,7 +9,6 @@ const DashBoard: React.FC<UserProp> = (props) => {
   }, []);
 
   const getDashBoardData = () => {
-    console.log(user);
   };
 
   const loadUserIfNotExist = () => {
@@ -22,6 +21,13 @@ const DashBoard: React.FC<UserProp> = (props) => {
     let userr = JSON.parse(userString);
 
     setUser(userr);
+    props.updateLoginSucces();
+
+    if(props.reloadRentObject !== undefined)
+    {
+      props.reloadRentObject();
+    }
+
   };
 
   getDashBoardData();

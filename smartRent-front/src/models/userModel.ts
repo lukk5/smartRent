@@ -1,4 +1,3 @@
-import { string } from "yup";
 import { UserAuthResponse } from "./userAuthModel";
 
 export type User = {
@@ -16,6 +15,7 @@ export interface UserProp {
   updateLoginSucces: ()=> void;
   updateUser?: (user: User) => void;
   logOut?: ()=> void;
+  reloadRentObject?: ()=> void;
 };
 
 export interface LoginProp {

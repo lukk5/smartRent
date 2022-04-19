@@ -83,7 +83,6 @@ const SignOnForm: React.FC = () => {
 
   const submitReg = async () => {
     try {
-      console.log("sad");
       if (!validateSubmit()) return;
 
       const isLandLord: boolean = userType === "landLord";

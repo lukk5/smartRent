@@ -2,7 +2,7 @@
 
 namespace smartRent.Repo.Entities
 {
-    public class Bills : BaseEntity
+    public class Bills : BaseDocument
     {
         public byte[] Content { get; set; }
         public Guid RentObjectId { get; set; }

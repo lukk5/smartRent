@@ -32,7 +32,6 @@ export const isPhone = (phone: string): boolean => {
       result = false;
   } 
 
-  console.log(result);
 
   return result;
 };

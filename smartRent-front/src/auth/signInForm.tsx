@@ -8,6 +8,13 @@ import "../image/logo.css";
 import { Button, TextField, Box, Grid, Alert } from "@mui/material";
 import { getUserById } from "../service/userService";
 
+
+const logInDataTenant = {
+  name: "lukastestas2",
+  password: "Zxcvbnm<>123"
+}
+
+
 const SignInForm: React.FC<LoginProp> = (props) => {
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -51,6 +58,9 @@ const SignInForm: React.FC<LoginProp> = (props) => {
     setLoginOccur(true);
 
     try {
+
+      mockLogin();
+
       const loginUser: LoginUserBody = {
         nickName: userName,
         password: password,
@@ -69,7 +79,7 @@ const SignInForm: React.FC<LoginProp> = (props) => {
       setLoginSuccess(true);
 
       await timeout(3000);
-      
+
       props.cacheUser(user);
       props.loginSuccess();
 
@@ -83,6 +93,14 @@ const SignInForm: React.FC<LoginProp> = (props) => {
       setLoginOccur(false);
     }
   };
+
+
+  const mockLogin = () =>
+  {
+    setUserName(logInDataTenant.name);
+    setPassword(logInDataTenant.password);
+  }
+
 
   return (
     <Box sx = {{ maxHeight: "100%" }}>

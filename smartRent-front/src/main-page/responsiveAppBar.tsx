@@ -12,19 +12,32 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../image/smartRentHeader.png"
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import MenuIcon from '@mui/icons-material/Menu';
+import logo from "../image/smartRentHeader.png";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
+import { RentObjectForNavBar } from "../models/rentObjectModel";
+import HomeIcon from "@mui/icons-material/Home";
+import { useState } from "react";
 
 const pages = ["Pagrindinis", "Dokumentai", "Sąskaitos", "Pranešimai"];
 const settings = ["Profilis", "Atsijungti"];
 
+const ITEM_HEIGHT = 48;
+
 interface AppBarProps {
   logOut: () => void;
+  handleRentObjectChange: (rentObject: RentObjectForNavBar) => void;
+  rentObjects?: RentObjectForNavBar[];
+  meniuItems: string[];
 }
 
 const ResponsiveAppBar = (props: AppBarProps) => {
   const navigate = useNavigate();
+
+  const [meniuItems, setMeniuItems] = useState<string[]>(props.meniuItems);
+  const [rentObjects, setRentObjects] = useState<
+    RentObjectForNavBar[] | undefined
+  >(props.rentObjects);
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -32,6 +45,15 @@ const ResponsiveAppBar = (props: AppBarProps) => {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClickOnRentObject = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseOnRentObject = () => {
+    setAnchorEl(null);
+  };
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -78,8 +100,29 @@ const ResponsiveAppBar = (props: AppBarProps) => {
     }
   };
 
+  const handleRentObjectClick = (object: string) => {
+
+    let rentObjectas: RentObjectForNavBar = {
+      id: "",
+      name: ""
+    };
+
+    rentObjects?.forEach((item) => 
+    {
+        if(item.name === object)
+        {
+          rentObjectas = item;
+        }
+    });
+
+    props.handleRentObjectChange(rentObjectas);
+  };
+
   return (
-    <AppBar position="static" sx={{ background: "#646BF5" , borderRadius: 5, boxShadow: 3 }}>
+    <AppBar
+      position="static"
+      sx={{ background: "#646BF5", borderRadius: 5, boxShadow: 3 }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
@@ -91,7 +134,13 @@ const ResponsiveAppBar = (props: AppBarProps) => {
             <img src={logo} className="center" alt="logo" />
           </Typography>
 
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" }, boxShadow: 3 }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: "flex", md: "none" },
+              boxShadow: 3,
+            }}
+          >
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -155,6 +204,41 @@ const ResponsiveAppBar = (props: AppBarProps) => {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
+            <IconButton
+              aria-label="more"
+              id="long-button"
+              aria-controls={open ? "long-menu" : undefined}
+              aria-expanded={open ? "true" : undefined}
+              aria-haspopup="true"
+              onClick={handleClickOnRentObject}
+            >
+              <HomeIcon />
+            </IconButton>
+            <Menu
+              id="long-menu"
+              MenuListProps={{
+                "aria-labelledby": "long-button",
+              }}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleCloseOnRentObject}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              {meniuItems.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "Pyxis"}
+                  onClick={handleCloseOnRentObject}
+                >
+                  <Button sx={{ textTransform: "none" }} onClick={() => {handleRentObjectClick(option);}}>{option}</Button>
+                </MenuItem>
+              ))}
+            </Menu>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <AccountCircleIcon fontSize="large" />

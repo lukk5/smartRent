@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using smartRent.BackEnd.Domain.Models;
 using smartRent.BackEnd.Domain.Services;
 using smartRent.BackEnd.Domain.ViewModels;
+using smartRent.BackEnd.Utils;
 using smartRent.Repo.Entities;
 using smartRent.Repo.Enums;
 using smartRent.Repo.RepoInterfaces;
+using smartRent.Repo.Utils;
 using static smartRent.BackEnd.Utils.Hashing;
 
 [ApiController]
@@ -288,10 +290,15 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetUser([FromRoute] string id, [FromRoute] bool landLord)
     {
-        var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ?? (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
-        
-        if (user is null) return NotFound();
+        return await Try.Action(async () =>
+        {
+            var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ??
+                       (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
 
-        return Ok(_mapper.Map<User, UserDTO>(user));
+            if (user is null) throw ExceptionUtil.ObjectNullException(user);
+
+            return Ok(_mapper.Map<User, UserDTO>(user));
+            
+        }).Finally(10);
     }
 }

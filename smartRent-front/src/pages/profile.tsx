@@ -172,7 +172,6 @@ const Profile: React.FC<UserProp> = (props) => {
         if (phone !== "") {
           if (!isPhone(phone)) {
             setPhoneHasError(true);
-            console.log(phone);
             setPhoneError("Blogai įvestas telefono numeris.");
           }
         } else {
@@ -245,7 +244,6 @@ const Profile: React.FC<UserProp> = (props) => {
 
       navigate("/");
     } catch (error: any) {
-      console.log(error);
       setUpdateOccur(true);
       setUpdateSucces(false);
       await timeout(4000);
