@@ -46,10 +46,7 @@ namespace smartRent.Repo.Migrations
                     b.Property<bool>("Paid")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("RentObjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenantId")
+                    b.Property<Guid>("RentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -69,9 +66,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RentObjectId");
-
-                    b.HasIndex("TenantId");
+                    b.HasIndex("RentId");
 
                     b.ToTable("Bills");
                 });
@@ -201,10 +196,7 @@ namespace smartRent.Repo.Migrations
                     b.Property<DateTime>("ExpireTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LandLordId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RentObjectId")
+                    b.Property<Guid>("RentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -218,9 +210,51 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RentObjectId");
+                    b.HasIndex("RentId");
 
                     b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("smartRent.Repo.Entities.Rent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RentObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RentObjectId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Rents");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.RentObject", b =>
@@ -253,9 +287,6 @@ namespace smartRent.Repo.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -271,8 +302,6 @@ namespace smartRent.Repo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LandLordId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("RentObjects");
                 });
@@ -314,15 +343,11 @@ namespace smartRent.Repo.Migrations
 
             modelBuilder.Entity("smartRent.Repo.Entities.Bills", b =>
                 {
-                    b.HasOne("smartRent.Repo.Entities.RentObject", null)
+                    b.HasOne("smartRent.Repo.Entities.Rent", null)
                         .WithMany("Bills")
-                        .HasForeignKey("RentObjectId")
+                        .HasForeignKey("RentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("smartRent.Repo.Entities.Tenant", null)
-                        .WithMany("Bills")
-                        .HasForeignKey("TenantId");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Document", b =>
@@ -336,9 +361,24 @@ namespace smartRent.Repo.Migrations
 
             modelBuilder.Entity("smartRent.Repo.Entities.Record", b =>
                 {
-                    b.HasOne("smartRent.Repo.Entities.RentObject", null)
+                    b.HasOne("smartRent.Repo.Entities.Rent", null)
                         .WithMany("Records")
+                        .HasForeignKey("RentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("smartRent.Repo.Entities.Rent", b =>
+                {
+                    b.HasOne("smartRent.Repo.Entities.RentObject", null)
+                        .WithMany("Rent")
                         .HasForeignKey("RentObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("smartRent.Repo.Entities.Tenant", null)
+                        .WithMany("Rents")
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -350,12 +390,6 @@ namespace smartRent.Repo.Migrations
                         .HasForeignKey("LandLordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("smartRent.Repo.Entities.Tenant", null)
-                        .WithMany("RentObjects")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.LandLord", b =>
@@ -363,20 +397,23 @@ namespace smartRent.Repo.Migrations
                     b.Navigation("RentObjects");
                 });
 
-            modelBuilder.Entity("smartRent.Repo.Entities.RentObject", b =>
+            modelBuilder.Entity("smartRent.Repo.Entities.Rent", b =>
                 {
                     b.Navigation("Bills");
-
-                    b.Navigation("Documents");
 
                     b.Navigation("Records");
                 });
 
+            modelBuilder.Entity("smartRent.Repo.Entities.RentObject", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("Rent");
+                });
+
             modelBuilder.Entity("smartRent.Repo.Entities.Tenant", b =>
                 {
-                    b.Navigation("Bills");
-
-                    b.Navigation("RentObjects");
+                    b.Navigation("Rents");
                 });
 #pragma warning restore 612, 618
         }

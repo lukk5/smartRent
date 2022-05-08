@@ -12,6 +12,8 @@ import Messages from "./pages/messages";
 import Profile from "./pages/profile";
 import { RentObjectForNavBar } from "./models/rentObjectModel";
 import { getRentObjectForNavBarByUserId } from "./service/rentObjectService";
+import RentObjects from "./pages/rentObjects";
+import RentObjectForm from "./pages/components/rentObjectForm";
 
 function App() {
   const [user, setUser] = useState<User | any>();
@@ -19,6 +21,18 @@ function App() {
   const [rentObjects, setRentObjects] = useState<RentObjectForNavBar[]>();
   const [rentObject, setRentObject] = useState<RentObjectForNavBar>();
   const [meniuItems, setMeniuItems] = useState<string[]>([""]);
+
+  useEffect(()=> {
+    let storage = window.localStorage.getItem("user");
+
+    if(storage === null) return;
+
+    setUser(JSON.parse(storage));
+    
+    if(!loginSuccess) setLoginSuccess(true);
+
+    debugger
+  },[])
 
   const cacheUser = (user: User | undefined) => {
     if (typeof user === "undefined" || user === null) return;
@@ -42,11 +56,7 @@ function App() {
 
   const loadRentObjectsByUser = async () => {
     try {
-      console.log(user);
-
       const data = await getRentObjectForNavBarByUserId(user.id);
-
-      console.log(data);
 
       if (data !== null && data !== undefined) {
         setRentObjects(data);
@@ -54,7 +64,7 @@ function App() {
 
       window.localStorage.setItem("rentObjects", JSON.stringify(data));
     } catch (error: any) {
-      console.log(error);
+
     }
   };
 
@@ -80,6 +90,7 @@ function App() {
   };
 
   const logOut = () => {
+    debugger;
     window.localStorage.clear();
     setLoginSuccess(false);
   };
@@ -95,15 +106,8 @@ function App() {
     setRentObject(objects[0]);
   };
 
-  // useEffect(() => {
-  //   setMeniu();
-  // }, [rentObjects]);
-
   const handleRentObjectChange = (rentObject: RentObjectForNavBar) => {
     setRentObject(rentObject);
-
-    console.log("veikia");
-
     const rentObjectString = window.localStorage.getItem("rentObject");
 
     if (rentObjectString !== null) {
@@ -125,6 +129,8 @@ function App() {
     setMeniuItems(itemsForMeniu);
   };
 
+  console.log(loginSuccess);
+
   return (
     <BrowserRouter>
       {loginSuccess ? (
@@ -133,12 +139,13 @@ function App() {
           meniuItems={meniuItems}
           rentObjects={rentObjects}
           handleRentObjectChange={handleRentObjectChange}
+          user={user}
         />
       ) : (
         <></>
       )}
       <Routes>
-        <Route
+        {user == null || typeof user === "undefined" ? (  <Route
           path="/"
           element={
             <SignInForm
@@ -148,7 +155,7 @@ function App() {
               loginSuccess={handleLoginSuccess}
             />
           }
-        />
+        />) : (<></>)}
         <Route path="/signOn" element={<SignOnForm />} />
         <Route
           path="/documents"
@@ -174,6 +181,14 @@ function App() {
             <Messages user={user} updateLoginSucces={handleLoginSuccess} />
           }
         />
+        <Route 
+          path="/rentObjects"
+          element={<RentObjects user={user} updateLoginSucces={handleLoginSuccess}/>}
+          />
+        <Route
+          path="/tenants"
+          element={<></>}
+          />
         <Route
           path="/profile"
           element={
@@ -193,6 +208,9 @@ function App() {
             </main>
           }
         />
+        <Route
+        path="rentObjects/:id"
+        element={<RentObjectForm user={user}> </RentObjectForm>}/>
       </Routes>
     </BrowserRouter>
   );

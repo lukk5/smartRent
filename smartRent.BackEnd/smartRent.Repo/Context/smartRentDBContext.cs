@@ -16,7 +16,7 @@ namespace smartRent.Repo.Context
         public DbSet<RentObject> RentObjects { get; init; }
         public DbSet<Record> Records { get; init; }
         public DbSet<Credentials> Credentials { get; init; }
-
+        public DbSet<Rent> Rents { get; init; }
         public SmartRentDbContext()
         {
         }

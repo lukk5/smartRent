@@ -4,8 +4,7 @@ import { User } from "./userModel";
 export type DocumentListItem = {
   id: string;
   name: string;
-  title: string;
-  date: Date;
+  date: string;
 };
 
 export type Document = {

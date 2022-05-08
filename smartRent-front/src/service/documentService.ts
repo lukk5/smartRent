@@ -1,5 +1,6 @@
 import unfetch from "unfetch";
 import { Document, DocumentListItem } from "../models/documentModel";
+import { apiUrl }  from "../env"
 
 async function getDocumentById(id: string): Promise<Document | null> {
   const token = window.localStorage.getItem("token");
@@ -9,7 +10,7 @@ async function getDocumentById(id: string): Promise<Document | null> {
   }
 
   const response = await fetch(
-    `http://localhost:27604/api/document/getById/${id}`,
+    `${apiUrl}document/getById/${id}`,
     {
       method: "GET",
       headers: {
@@ -37,7 +38,7 @@ async function getDocumentsForList(
   }
 
   const response = await fetch(
-    `http://localhost:27604/api/document/getByObjectId/${id}`,
+    `${apiUrl}document/getByObjectId/${id}`,
     {
       method: "GET",
       headers: {
@@ -46,7 +47,7 @@ async function getDocumentsForList(
       },
     }
   );
-
+  
   const data = await response.json();
 
   if (response.status !== 200) {
@@ -62,7 +63,7 @@ async function createDocument(document: Document) {
     throw new Error("Token not exists.");
   }
 
-  const response = await unfetch(`http://localhost:27604/api/document/create`, {
+  const response = await unfetch(`${apiUrl}document/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -35,17 +35,17 @@ namespace smartRent.BackEnd.Controllers
         }
 
         [HttpGet]
-        [Route("getByObjectId")]
+        [Route("getByObjectId/{id}")]
         [Authorize]
         public async Task<IActionResult> GetByObjectId([FromRoute] string id)
         {
-            var documents = await _repository.GetAllAsync();
-
-            var objectDocuments = documents.Where(x => x.RentObjectId == Guid.Parse(id));
-
-            var result = objectDocuments.Select(document => (DocumentViewModelItem) new() {Id = document.Id.ToString(), Name = document.Name, Title = document.Title, Date = document.CreatedAt}).ToList();
-
-            return Ok(result);
+            return await Try.Action(async () =>
+            {
+                var documents = await _repository.GetAllAsync();
+                var objectDocuments = documents.Where(x => x.RentObjectId == Guid.Parse(id));
+                var result = objectDocuments.Select(document => (DocumentViewModelItem) new() {Id = document.Id.ToString(), Name = document.Name, Date = document.CreatedAt.ToString()}).ToList();
+                return Ok(result);
+            }).Finally(10);
         }
 
         [HttpGet]

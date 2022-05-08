@@ -34,7 +34,7 @@ namespace smartRent.BackEnd.Controllers
         {
             return await Try.Action(async () =>
             {
-                var rentObjects = (await _rentRepository.GetAllAsync()).Where(x => x.LandLordId == landLordId)
+                /*var rentObjects = (await _rentRepository.GetAllAsync()).Where(x => x.LandLordId == landLordId)
                     .OrderByDescending(x => x.CreatedAt).Take(pageSize).ToList();
 
                 var incomeFromAll = rentObjects.Sum(x => x.Price);
@@ -58,7 +58,9 @@ namespace smartRent.BackEnd.Controllers
                     ExpensesFromAll = expensesFromAll,
                     Records = _mapper.Map<IEnumerable<Record>, IEnumerable<RecordDTO>>(records)
 
-                });
+                });*/
+
+                return Ok();
             }).Finally(10);
         }
     }

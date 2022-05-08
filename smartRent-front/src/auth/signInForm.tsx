@@ -14,6 +14,11 @@ const logInDataTenant = {
   password: "Zxcvbnm<>123"
 }
 
+const logInDataLandLord = {
+  name: "lukBoss",
+  password: "Zxcvbnm<>123"
+}
+
 
 const SignInForm: React.FC<LoginProp> = (props) => {
   const [userName, setUserName] = useState<string>("");
@@ -59,12 +64,19 @@ const SignInForm: React.FC<LoginProp> = (props) => {
 
     try {
 
-      mockLogin();
+      // mock user login
 
       const loginUser: LoginUserBody = {
-        nickName: userName,
-        password: password,
+        nickName: logInDataLandLord.name,
+        password: logInDataLandLord.password,
       };
+
+
+
+      // const loginUser: LoginUserBody = {
+      //   nickName: userName,
+      //   password: password,
+      // };
 
       const response = await authenticate(loginUser);
 
@@ -93,14 +105,6 @@ const SignInForm: React.FC<LoginProp> = (props) => {
       setLoginOccur(false);
     }
   };
-
-
-  const mockLogin = () =>
-  {
-    setUserName(logInDataTenant.name);
-    setPassword(logInDataTenant.password);
-  }
-
 
   return (
     <Box sx = {{ maxHeight: "100%" }}>

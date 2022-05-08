@@ -17,10 +17,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { RentObjectForNavBar } from "../models/rentObjectModel";
 import HomeIcon from "@mui/icons-material/Home";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { User } from "../models/userModel";
 
-const pages = ["Pagrindinis", "Dokumentai", "Sąskaitos", "Pranešimai"];
+const pagesTenant = ["Pagrindinis", "Dokumentai", "Sąskaitos", "Pranešimai"];
+const pagesLandLord = ["Pagrindinis", "Nuomos objektai", "Nuomininkai", "Sąskaitos", "Pranešimai"];
 const settings = ["Profilis", "Atsijungti"];
+let pages = ["","",""];
 
 const ITEM_HEIGHT = 48;
 
@@ -29,15 +32,26 @@ interface AppBarProps {
   handleRentObjectChange: (rentObject: RentObjectForNavBar) => void;
   rentObjects?: RentObjectForNavBar[];
   meniuItems: string[];
+  user: User;
 }
 
 const ResponsiveAppBar = (props: AppBarProps) => {
   const navigate = useNavigate();
-
   const [meniuItems, setMeniuItems] = useState<string[]>(props.meniuItems);
   const [rentObjects, setRentObjects] = useState<
     RentObjectForNavBar[] | undefined
   >(props.rentObjects);
+
+
+  useEffect(()=> {
+    if(props.user.userType === "tenant")
+    {
+      pages = pagesTenant;
+    } else {
+      pages = pagesLandLord;
+    }
+  },[]);
+
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -96,6 +110,12 @@ const ResponsiveAppBar = (props: AppBarProps) => {
         break;
       case "Pagrindinis":
         navigate("/home");
+        break;
+      case "Nuomininkai":
+        navigate("/tenants");
+        break;
+      case "Nuomos objektai":
+        navigate("/rentObjects")
         break;
     }
   };
@@ -214,6 +234,7 @@ const ResponsiveAppBar = (props: AppBarProps) => {
             >
               <HomeIcon />
             </IconButton>
+            {props.user.userType === "tenant" ? (
             <Menu
               id="long-menu"
               MenuListProps={{
@@ -238,7 +259,7 @@ const ResponsiveAppBar = (props: AppBarProps) => {
                   <Button sx={{ textTransform: "none" }} onClick={() => {handleRentObjectClick(option);}}>{option}</Button>
                 </MenuItem>
               ))}
-            </Menu>
+            </Menu> ) : (<></>) }
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <AccountCircleIcon fontSize="large" />
