@@ -2,14 +2,37 @@ export type Bill = {
     id: string;
     amount: number;
     paid: boolean;
-    objectId: string;
+    rentObjectId: string;
     validFrom: string;
-    validToDate: string;
-    content: Blob;
+    validTo: string;
+    tenantName: string;
+    name: string;
+    title: string;
+    paymentDate: string | null;
+    fileExist: boolean;
 };
 
 export type BillForRow = {
     id: string;
     name: string;
     paid: boolean;
+}
+
+export type BillTableItem = {
+    id: string;
+    name: string;
+    paid: string;
+    startingDate: string;
+    endDate: string;
+    tenantName: string;
+};
+
+export type BillFile = {
+    id: string;
+    file: File;
+}
+
+export type BillFileResponse = {
+    fileName: string;
+    file: Blob;
 }

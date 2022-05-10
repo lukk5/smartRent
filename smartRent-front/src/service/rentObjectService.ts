@@ -199,9 +199,6 @@ async function updateRent(rent:Rent) {
       body: JSON.stringify(rent)
     }
   );
-
-  console.log(response);
-
   if(response.status !== 200)
   {
     throw new Error("Update unsuccessful.");

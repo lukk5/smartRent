@@ -7,11 +7,11 @@ using smartRent.Repo.RepoInterfaces;
 
 namespace smartRent.Repo.Repo
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
     {
         private readonly SmartRentDbContext _context;
         
-        public BaseRepository(SmartRentDbContext context)
+        public Repository(SmartRentDbContext context)
         {
             _context = context;
         }

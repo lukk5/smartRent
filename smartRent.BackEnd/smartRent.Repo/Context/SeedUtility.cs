@@ -8,9 +8,9 @@ namespace smartRent.Repo.Context
 {
     public class SeedUtility
     {
-        private readonly IBaseRepository<User> _userRepo;
+        private readonly IRepository<User> _userRepo;
 
-        public SeedUtility(IBaseRepository<User> userRepo)
+        public SeedUtility(IRepository<User> userRepo)
         {
             _userRepo = userRepo;
         }

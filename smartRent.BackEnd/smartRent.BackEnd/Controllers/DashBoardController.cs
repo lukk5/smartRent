@@ -16,12 +16,12 @@ namespace smartRent.BackEnd.Controllers
     [Route("api/[controller]")]
     public class DashBoardController : ControllerBase
     {
-        private readonly IBaseRepository<RentObject> _rentRepository;
-        private readonly IBaseRepository<Record> _recordRepository;
+        private readonly IRepository<RentObject> _rentRepository;
+        private readonly IRepository<Record> _recordRepository;
      
         private readonly IMapper _mapper;
         
-        public DashBoardController(IBaseRepository<RentObject> rentRepository, IMapper mapper, IBaseRepository<Record> recordRepository)
+        public DashBoardController(IRepository<RentObject> rentRepository, IMapper mapper, IRepository<Record> recordRepository)
         {
             _rentRepository = rentRepository;
             _mapper = mapper;

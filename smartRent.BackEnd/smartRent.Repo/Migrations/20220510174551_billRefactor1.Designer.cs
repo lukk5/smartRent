@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using smartRent.Repo.Context;
 
@@ -11,9 +12,10 @@ using smartRent.Repo.Context;
 namespace smartRent.Repo.Migrations
 {
     [DbContext(typeof(SmartRentDbContext))]
-    partial class SmartRentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220510174551_billRefactor1")]
+    partial class billRefactor1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

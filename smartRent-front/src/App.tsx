@@ -7,13 +7,14 @@ import { UserAuthResponse } from "./models/userAuthModel";
 import { User } from "./models/userModel";
 import ResponsiveAppBar from "./main-page/responsiveAppBar";
 import Documents from "./pages/documents";
-import Bills from "./pages/bills";
+import BillComponent from "./pages/components/bills/billComponent";
 import Messages from "./pages/messages";
 import Profile from "./pages/profile";
 import { RentObjectForNavBar } from "./models/rentObjectModel";
 import { getRentObjectForNavBarByUserId } from "./service/rentObjectService";
-import RentObjects from "./pages/rentObjects";
-import RentObjectForm from "./pages/components/rentObjectForm";
+import RentObjectComponent from "./pages/components/rentObject/rentObjectComponent";
+import RentObjectForm from "./pages/components/rentObject/rentObjectForm";
+import BillForm from "./pages/components/bills/billForm";
 
 function App() {
   const [user, setUser] = useState<User | any>();
@@ -30,8 +31,6 @@ function App() {
     setUser(JSON.parse(storage));
     
     if(!loginSuccess) setLoginSuccess(true);
-
-    debugger
   },[])
 
   const cacheUser = (user: User | undefined) => {
@@ -90,7 +89,6 @@ function App() {
   };
 
   const logOut = () => {
-    debugger;
     window.localStorage.clear();
     setLoginSuccess(false);
   };
@@ -128,8 +126,6 @@ function App() {
 
     setMeniuItems(itemsForMeniu);
   };
-
-  console.log(loginSuccess);
 
   return (
     <BrowserRouter>
@@ -173,7 +169,7 @@ function App() {
         />
         <Route
           path="/bills"
-          element={<Bills user={user} updateLoginSucces={handleLoginSuccess} />}
+          element={<BillComponent user={user} updateLoginSucces={handleLoginSuccess} />}
         />
         <Route
           path="/messages"
@@ -183,7 +179,7 @@ function App() {
         />
         <Route 
           path="/rentObjects"
-          element={<RentObjects user={user} updateLoginSucces={handleLoginSuccess}/>}
+          element={<RentObjectComponent user={user} updateLoginSucces={handleLoginSuccess}/>}
           />
         <Route
           path="/tenants"
@@ -210,7 +206,10 @@ function App() {
         />
         <Route
         path="rentObjects/:id"
-        element={<RentObjectForm user={user}> </RentObjectForm>}/>
+        element={<RentObjectForm user={user}/>}/>
+        <Route
+        path="bills/:id"
+        element={<BillForm user={user}/>}/>
       </Routes>
     </BrowserRouter>
   );

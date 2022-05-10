@@ -55,8 +55,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
 var mapperConfig = new MapperConfiguration(mc => { mc.AddProfile(new MappingProfile()); });
 builder.Services.AddSingleton<IAuthService>(
     new AuthService(

@@ -18,9 +18,9 @@ namespace smartRent.BackEnd.Controllers
     public class DocumentController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IBaseRepository<Document> _repository;
+        private readonly IRepository<Document> _repository;
 
-        public DocumentController(IMapper mapper, IBaseRepository<Document> repository)
+        public DocumentController(IMapper mapper, IRepository<Document> repository)
         {
             _mapper = mapper;
             _repository = repository;

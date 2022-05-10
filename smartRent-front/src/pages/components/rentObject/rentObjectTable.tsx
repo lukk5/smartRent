@@ -1,8 +1,8 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Checkbox } from "@mui/material";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Checkbox } from "@mui/material";
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { RentObjectTableItem } from "../../models/rentObjectModel";
-import Loading  from "../components/loading";
+import { RentObjectTableItem } from "../../../models/rentObjectModel";
+import Loading  from "../../components/loading";
 
 interface RentObjectsTableProps 
 {

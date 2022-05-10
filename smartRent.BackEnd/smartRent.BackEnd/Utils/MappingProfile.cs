@@ -29,12 +29,16 @@ namespace smartRent.BackEnd.Utils
 
             CreateMap<Bills, BillDTO>().ForMember(x => x.Id, o => o.MapFrom(p => p.Id.ToString()))
                 .ForMember(x => x.ValidFrom, o => o.MapFrom(p => p.ValidFrom.ToString("yyyy-MM-dd")))
-                .ForMember(x => x.ValidTo, o => o.MapFrom(p => p.ValidTo.ToString("yyyy-MM-dd")));
+                .ForMember(x => x.ValidTo, o => o.MapFrom(p => p.ValidTo.ToString("yyyy-MM-dd")))
+                .ForMember(x => x.RentId, o => o.MapFrom(p => p.RentId.ToString()))
+                .ForMember(x => x.PaymentDate, o => o.MapFrom(p => (p.PaymentDate != null) ? p.PaymentDate.ToString() : null));
 
             CreateMap<BillDTO, Bills>().ForMember(x => x.Id, o => o.MapFrom(p => Guid.Parse(p.Id)))
                 .ForMember(x => x.ValidFrom, o => o.MapFrom(p => DateTime.Parse(p.ValidFrom)))
-                .ForMember(x => x.ValidTo, o => o.MapFrom(p => DateTime.Parse(p.ValidTo)));
-            
+                .ForMember(x => x.ValidTo, o => o.MapFrom(p => DateTime.Parse(p.ValidTo)))
+                .ForMember(x => x.RentId, o => o.MapFrom(p => Guid.Parse(p.RentId)))
+                .ForMember(x => x.PaymentDate, o => o.MapFrom(p => DateTime.Parse(p.PaymentDate)));
+
             CreateMap<Rent,RentDTO>().ForMember(x => x.Id, o => o.MapFrom(p => p.Id.ToString()))
                 .ForMember(x => x.StartingDate, o => o.MapFrom(p => p.StartingDate.ToString("yyyy-MM-dd")))
                 .ForMember(x => x.EndingDate, o => o.MapFrom(p => p.EndingDate.ToString("yyyy-MM-dd")));

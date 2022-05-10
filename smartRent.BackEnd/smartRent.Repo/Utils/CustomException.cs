@@ -2,7 +2,7 @@
 
 namespace smartRent.Repo.Utils
 {
-    public static class ExceptionUtil
+    public static class CustomException
     {
         public static Exception ObjectNullException(object? instance)
         {

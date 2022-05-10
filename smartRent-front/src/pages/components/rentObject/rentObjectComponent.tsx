@@ -1,12 +1,12 @@
 import { Box, Button, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RentObject, RentObjectTableItem } from "../models/rentObjectModel";
-import { UserProp } from "../models/userModel";
-import { getRentObjectsListByLandLordId } from "../service/rentObjectService";
-import RentObjectsTable  from "./components/rentObjectTable" 
+import { RentObject, RentObjectTableItem } from "../../../models/rentObjectModel";
+import { UserProp } from "../../../models/userModel";
+import { getRentObjectsListByLandLordId } from "../../../service/rentObjectService";
+import RentObjectsTable  from "./rentObjectTable"; 
 
-const RentObjects: React.FC<UserProp> = (props) => {
+const RentObjectComponent: React.FC<UserProp> = (props) => {
   const [rentObjects, setRentObjects] = useState<RentObject[] | null>([]);
   const [rentObjectsTableItems, setRentObjectsTableItems] = useState<RentObjectTableItem[]>([]);
   const [selected, setSelected] = useState<readonly string[]>([]);
@@ -83,8 +83,8 @@ const RentObjects: React.FC<UserProp> = (props) => {
   };
 
   return (
-    <Grid container alignItems="center"
-    justifyContent="center" sx={{ margin: 1, xs: "flex", md: "none"}}>
+    <Grid container alignItems="center" direction={"column"}
+    justifyContent="center" sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15}}>
        <Grid item xs={6} md={4} sx={{ marginRight: 40, marginBottom: 1 }}>
               <Box sx={{
             width: 480,
@@ -127,4 +127,4 @@ const RentObjects: React.FC<UserProp> = (props) => {
   );
 };
 
-export default RentObjects;
+export default RentObjectComponent;

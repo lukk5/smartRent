@@ -19,15 +19,15 @@ using static smartRent.BackEnd.Utils.Hashing;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IBaseRepository<Tenant> _tenantRepo;
-    private readonly IBaseRepository<LandLord> _landLordRepo;
-    private readonly IBaseRepository<Credentials> _credRepository;
+    private readonly IRepository<Tenant> _tenantRepo;
+    private readonly IRepository<LandLord> _landLordRepo;
+    private readonly IRepository<Credentials> _credRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly IAuthService _authService;
 
-    public UserController(IMapper mapper, IBaseRepository<Credentials> credRepository,
-        IBaseRepository<LandLord> landLordRepo, IBaseRepository<Tenant> tenantRepo, IUserRepository userRepository,
+    public UserController(IMapper mapper, IRepository<Credentials> credRepository,
+        IRepository<LandLord> landLordRepo, IRepository<Tenant> tenantRepo, IUserRepository userRepository,
         IAuthService authService)
     {
         _credRepository = credRepository;
@@ -295,7 +295,7 @@ public class UserController : ControllerBase
             var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ??
                        (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
 
-            if (user is null) throw ExceptionUtil.ObjectNullException(user);
+            if (user is null) throw CustomException.ObjectNullException(user);
 
             return Ok(_mapper.Map<User, UserDTO>(user));
             

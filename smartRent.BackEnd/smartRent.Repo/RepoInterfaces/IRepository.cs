@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace smartRent.Repo.RepoInterfaces
 {
-    public interface IBaseRepository<T> where T: class
+    public interface IRepository<T> where T: class
     {
         Task<bool> CreateAsync(T entity);
         Task<T> GetByIdAsync(Guid guid);

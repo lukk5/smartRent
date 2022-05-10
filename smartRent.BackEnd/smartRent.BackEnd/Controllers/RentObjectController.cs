@@ -20,15 +20,15 @@ namespace smartRent.BackEnd.Controllers
     public class RentObjectController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IBaseRepository<RentObject> _repository;
-        private readonly IBaseRepository<Rent> _rentRepository;
-        private readonly IBaseRepository<Tenant> _tenantRepository;
-        private readonly IBaseRepository<LandLord> _landLordRepository;
-        private readonly IBaseRepository<Bills> _billRepository;
+        private readonly IRepository<RentObject> _repository;
+        private readonly IRepository<Rent> _rentRepository;
+        private readonly IRepository<Tenant> _tenantRepository;
+        private readonly IRepository<LandLord> _landLordRepository;
+        private readonly IRepository<Bills> _billRepository;
 
-        public RentObjectController(IMapper mapper, IBaseRepository<RentObject> repository,
-            IBaseRepository<LandLord> landLordRepository, IBaseRepository<Tenant> tenantRepository,
-            IBaseRepository<Rent> rentRepository, IBaseRepository<Bills> billRepository)
+        public RentObjectController(IMapper mapper, IRepository<RentObject> repository,
+            IRepository<LandLord> landLordRepository, IRepository<Tenant> tenantRepository,
+            IRepository<Rent> rentRepository, IRepository<Bills> billRepository)
         {
             _mapper = mapper;
             _repository = repository;
@@ -136,7 +136,7 @@ namespace smartRent.BackEnd.Controllers
             return await Try.Action(async () =>
             {
                 var rentObject = await _repository.GetByIdAsync(Guid.Parse(id));
-                if (rentObject is null) throw ExceptionUtil.ObjectNullException(rentObject);
+                if (rentObject is null) throw CustomException.ObjectNullException(rentObject);
 
                 var rents = await _rentRepository.GetAllAsync();
 
@@ -157,7 +157,7 @@ namespace smartRent.BackEnd.Controllers
                 var rentObject = await _repository.GetByIdAsync(Guid.Parse(id));
 
                 if (rentObject is null)
-                    throw ExceptionUtil.ObjectNullException(rentObject);
+                    throw CustomException.ObjectNullException(rentObject);
 
                 return Ok(_mapper.Map<RentObject, RentObjectDTO>(rentObject));
             }).Finally(10);
@@ -196,7 +196,7 @@ namespace smartRent.BackEnd.Controllers
             {
                 var targetRent = await _rentRepository.GetByIdAsync(Guid.Parse(rentDto.Id));
 
-                if (targetRent is null) ExceptionUtil.ObjectNullException(targetRent);
+                if (targetRent is null) CustomException.ObjectNullException(targetRent);
 
                 targetRent.EndingDate = DateTime.Parse(rentDto.EndingDate);
                 targetRent.Active = rentDto.Active;
@@ -216,7 +216,7 @@ namespace smartRent.BackEnd.Controllers
             {
                 var targetRentObject = await _repository.GetByIdAsync(Guid.Parse(rentObjectDto.Id));
 
-                if (targetRentObject is null) ExceptionUtil.ObjectNullException(targetRentObject);
+                if (targetRentObject is null) CustomException.ObjectNullException(targetRentObject);
 
                 targetRentObject.Currency = (Currency) Enum.Parse(typeof(Currency), rentObjectDto.Currency, true);
                 targetRentObject.Price = rentObjectDto.Price;

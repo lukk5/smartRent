@@ -17,6 +17,13 @@ namespace smartRent.Repo.Repo
         {
             _context = context;
         }
+
+        public async Task<User> GetUserById(Guid id)
+        {
+            User result = await _context.Tenants.FindAsync(id);
+            if (result is null) return await _context.LandLords.FindAsync(id);
+            return result;
+        }
         
         public async Task<bool> RegisterLandLord(LandLord user, Credentials credentials)
         {

@@ -4,8 +4,6 @@ import {
   Grid,
   Box,
   Typography,
-  Tabs,
-  Tab,
   TextField,
   Button,
   Dialog,
@@ -23,15 +21,16 @@ import {
   TableHead,
   TableRow,
   TableBody,
+  Alert,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { BillForRow } from "../../models/billModel";
-import { DocumentListItem } from "../../models/documentModel";
-import { RentObject, Rent, RentDetail, RentHistoryItem } from "../../models/rentObjectModel";
-import { User } from "../../models/userModel";
-import { getByRentIdForRows } from "../../service/billService";
-import { getDocumentsForList } from "../../service/documentService";
+import { useNavigate, useParams } from "react-router-dom";
+import { BillForRow } from "../../../models/billModel";
+import { DocumentListItem } from "../../../models/documentModel";
+import { RentObject, Rent, RentDetail, RentHistoryItem } from "../../../models/rentObjectModel";
+import { User } from "../../../models/userModel";
+import { getByRentIdForRows } from "../../../service/billService";
+import { getDocumentsForList } from "../../../service/documentService";
 import {
   getRentByObjectId,
   getRentDetailsById,
@@ -39,10 +38,15 @@ import {
   getRentsHistoryByObjectId,
   updateRent,
   updateRentObject,
-} from "../../service/rentObjectService";
+} from "../../../service/rentObjectService";
 
 interface RentObjectFormProps {
   user: User;
+}
+
+
+function timeout(delay: number) {
+  return new Promise((res) => setTimeout(res, delay));
 }
 
 const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
@@ -60,6 +64,10 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
   const [dateForUpdate, setDateForUpdate] = useState<string>(new Date().toDateString());
   const [bills, setBills] = useState<BillForRow[] | null>([]);
   const [rentHistory, setRentHistory] = useState<RentHistoryItem[] | null>([]);
+  const [updateOccur, setUpdateOccur] = useState<boolean>(false);
+  const [updateSuccess, setUpdateSuccess] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async (id: string | undefined) => {
@@ -102,6 +110,18 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
   },[rent]);
 
+
+  const handleOpenBill = (id: string) => {
+    navigate(`/bills/${id}`);
+  };
+
+  const handleOpenRent = (id: string) => {
+    navigate(`/rents/${id}`);
+  };
+
+  const handleOpenDocument = (id: string) => {
+    navigate(`/documents/${id}`);
+  };
 
   const handleChange = (event: SelectChangeEvent) => {
     setCurrency(event.target.value);
@@ -159,7 +179,19 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
     try {
       await updateRentObject(update);
       setRentObject(update);
-    } catch { }
+
+      setUpdateOccur(true);
+      setUpdateSuccess(true);
+      await timeout(5000);
+      setUpdateOccur(false);
+
+    } catch(error: any) {
+      console.log(error);
+      setUpdateOccur(true);
+      setUpdateSuccess(false);
+      await timeout(5000);
+      setUpdateOccur(false);
+     }
   };
 
   const handleRentUpdate = async() => {
@@ -178,8 +210,22 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
     try {
       await updateRent(update);
+
+      setUpdateOccur(true);
+      setUpdateSuccess(true);
+      await timeout(5000);
+      setUpdateOccur(false);
+
       setRent(update);
-    }catch { }
+    }catch(error: any) {
+      console.log(error);
+
+      setUpdateOccur(true);
+      setUpdateSuccess(false);
+      await timeout(5000);
+      setUpdateOccur(false);
+
+     }
 
     setOpenDialogRent(false);
 
@@ -200,9 +246,20 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
     try {
       console.log(rentHistory);
-     // await updateRent(update);
-     // setRent(update);
-    }catch { }
+      await updateRent(update);
+
+      setUpdateOccur(true);
+      setUpdateSuccess(true);
+      await timeout(5000);
+      setUpdateOccur(false);
+
+      setRent(update);
+    }catch(error: any) { 
+      setUpdateOccur(true);
+      setUpdateSuccess(false);
+      await timeout(5000);
+      setUpdateOccur(false);
+    }
   };
 
   const handleConfirm = async () => {
@@ -236,7 +293,17 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
   return (
     <div>
-      <Grid container sx={{ marginTop: 2, marginLeft: 2 }}>
+      {updateSuccess === false && updateOccur === true? (
+        <Alert severity="error">Atnaujinimas nesėkmingas.</Alert>
+      ) : (
+        <></>
+      )}
+      {updateSuccess === true && updateOccur === true ? (
+        <Alert severity="success">Atnaujinimas sėkmingas.</Alert>
+      ) : (
+        <></>
+      )}
+      <Grid container alignSelf={"center"} alignItems={"center"} sx={{ marginTop: 2, marginLeft: 2 }}>
         <Grid item xs={6} md={4} sx={{ marginRight: -5 }}>
           <Box
             sx={{
@@ -423,7 +490,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                         <TableCell align="left">{row.name}</TableCell>
                         <TableCell align="left">{row.date}</TableCell>
                         <TableCell align="left">
-                          <Button variant="outlined">
+                          <Button variant="outlined" onClick={()=> { handleOpenDocument(row.id); }}>
                             Atidaryti
                             </Button></TableCell>
                       </TableRow>
@@ -610,7 +677,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                         <TableCell align="left">{row.name}</TableCell>
                         <TableCell align="left">{row.paid === true ? "Taip" : "Ne"}</TableCell>
                         <TableCell align="left">
-                          <Button variant="outlined">
+                          <Button variant="outlined" onClick={()=> {handleOpenBill(row.id);}}>
                             Atidaryti
                             </Button></TableCell>
                       </TableRow>
@@ -653,7 +720,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                         <TableCell align="left">{row.tenantName}</TableCell>
                         <TableCell align="left">{row.endDate}</TableCell>
                         <TableCell align="left">
-                          <Button variant="outlined">
+                          <Button variant="outlined" onClick={()=> { handleOpenRent(row.id); }} >
                             Atidaryti
                             </Button></TableCell>
                       </TableRow>
@@ -665,16 +732,6 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
             </Box>
             </Grid>
         </Grid>
-      {/* {updateSuccess === false && updateOccur === true ? (
-        <Alert severity="error">Atnaujinimas nesėkmingas.</Alert>
-      ) : (
-        <></>
-      )}
-      {updateSuccess === true && updateOccur === true ? (
-        <Alert severity="success">Atnaujinimas sėkmingas.</Alert>
-      ) : (
-        <></>
-      )} */}
     </div>
   );
 };
