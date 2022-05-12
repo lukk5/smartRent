@@ -1,20 +1,28 @@
 import { RentObjectForNavBar } from "./rentObjectModel";
 import { User } from "./userModel";
 
-export type DocumentListItem = {
+export type DocumentTableItem = {
   id: string;
   name: string;
   date: string;
+  type: string;
+  rentObjectId: string;
 };
 
-export type Document = {
+export type DocumentModel = {
+  body: any;
   id: string;
   name: string;
   title: string;
-  content: ArrayBuffer;
+  type: string;
+  rentObjectId: string;
 };
 
 export type DocumentProps = {
-  rentObject?: RentObjectForNavBar;
   user: User;  
+}
+
+export type DocumentFile = {
+  id: string;
+  file: File;
 }

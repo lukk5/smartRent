@@ -38,6 +38,28 @@ namespace smartRent.BackEnd.Controllers
             _fileRepository = fileRepository;
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("create")]
+        public async Task<IActionResult> Create([FromBody] BillDTO billDto)
+        {
+            return await Try.Action(async () =>
+            {
+                var bill = _mapper.Map<BillDTO, Bills>(billDto);
+                var targetRentOjbect = await _rentObjectRepository.GetByIdAsync(Guid.Parse(billDto.RentObjectId));
+                var rents = await _rentRepository.GetAllAsync();
+                var targetRent = rents.SingleOrDefault(x => x.Active && x.RentObjectId == targetRentOjbect.Id);
+                
+                bill.CreatedAt = DateTime.Now;
+                bill.CreatedBy = "system";
+                bill.RentId = targetRent.Id;
+
+                await _billRepository.CreateAsync(bill);
+                
+                return Ok();
+            }).Finally(5);
+        }
+
         [HttpPut]
         [Authorize]
         [Route("update")]
@@ -85,7 +107,7 @@ namespace smartRent.BackEnd.Controllers
             }).Finally(10);
         }
 
-        [HttpDelete]
+        /*[HttpDelete]
         [Route("deleteFile/{id}")]
         [Authorize]
         public async Task<IActionResult> RemoveFile([FromRoute] string id)
@@ -106,7 +128,7 @@ namespace smartRent.BackEnd.Controllers
                 
                 return Ok();
             }).Finally(10);
-        }
+        }*/
 
         [HttpGet]
         [Route("getBillTableItemsByUserIdAndStatus/{id}/{status}")]
@@ -163,36 +185,8 @@ namespace smartRent.BackEnd.Controllers
             }).Finally(10);
         }
 
-        [HttpGet]
-        [Route("getFile/{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetFileById([FromRoute] string id)
-        {
-            return await Try.Action(async () =>
-            {
-                var targetBill = await _billRepository.GetByIdAsync(Guid.Parse(id));
 
-                if (targetBill is null) CustomException.ObjectNullException(targetBill);
-                return Ok(await _fileRepository.GetFileContentByName(targetBill.UniqueFileName));
-            }).Finally(10);
-        }
-        
-        [HttpGet]
-        [Route("getFileName/{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetFileNameById([FromRoute] string id)
-        {
-            return await Try.Action(async () =>
-            {
-                var targetBill = await _billRepository.GetByIdAsync(Guid.Parse(id));
-
-                if (targetBill is null) CustomException.ObjectNullException(targetBill);
-                
-                return Ok(new BillFileResponse() { FileName = targetBill.UniqueFileName, File = null});
-            }).Finally(10);
-        }
-
-        [HttpPost]
+        /*[HttpPost]
         [Route("addFile")]
         [Authorize]
         public async Task<IActionResult> AddFile([FromForm] BillFile billFile)
@@ -212,6 +206,31 @@ namespace smartRent.BackEnd.Controllers
 
                 return Ok();
             }).Finally(10);
+        }*/
+        
+        [HttpDelete]
+        [Route("remove/{id}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveById([FromRoute] string id)
+        {
+            return await Try.Action(async () =>
+            {
+                var targetBill = await _billRepository.GetByIdAsync(Guid.Parse(id));
+
+                if (targetBill is null) CustomException.ObjectNullException(targetBill);
+
+                try
+                {
+                    _fileRepository.RemoveFileByName(targetBill.UniqueFileName);
+                }
+                catch (Exception e)
+                {
+                    
+                }
+
+                await _billRepository.RemoveByIdAsync(Guid.Parse(id));
+                return Ok();
+            }).Finally(5);
         }
     }
 }

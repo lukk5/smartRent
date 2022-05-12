@@ -8,6 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
   Grid,
+  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -16,15 +17,15 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Bill, BillFile } from "../../../models/billModel";
+import { Bill} from "../../../models/billModel";
+import { FileModel } from "../../../models/fileModel";
 import { User } from "../../../models/userModel";
 import {
-  addFile,
   getById,
-  getFile,
-  removeFile,
-  update,
+  update
 } from "../../../service/billService";
+import { addFile, getFile, removeFile } from "../../../service/fileService";
+import { DownloadFile } from "../../../utils/fileDownloader";
 
 interface BillFormProps {
   user: User;
@@ -88,19 +89,13 @@ const BillForm: React.FC<BillFormProps> = (props) => {
     try {
       if (typeof bill === "undefined") return;
 
-      const result = await getFile(bill.id);
-      const newBlob = new Blob([result.file], { type: "pdf" });
-      const url = window.URL.createObjectURL(newBlob);
-      const tempElement = document.createElement("a");
-      tempElement.href = url;
-      tempElement.setAttribute("download", result.fileName);
+      const result = await getFile(bill.id, "bill");
+      
+      if(result === null) return;
 
-      document.body.appendChild(tempElement);
+      DownloadFile(result.file, result.fileName);
 
-      tempElement.click();
-      tempElement.parentNode?.removeChild(tempElement);
     } catch (error: any) {
-      console.log(error);
     }
   };
 
@@ -113,9 +108,11 @@ const BillForm: React.FC<BillFormProps> = (props) => {
     try {
       if (typeof file === "undefined" || typeof bill === "undefined") return;
 
-      let uploadFile: BillFile = {
-        id: bill?.id,
+      let uploadFile: FileModel = {
+        fileName: "",
+        id: bill.id,
         file: file,
+        type: "bill"
       };
 
       await addFile(uploadFile);
@@ -124,7 +121,6 @@ const BillForm: React.FC<BillFormProps> = (props) => {
       await timeout(5000);
       setUploadOccur(false);
     } catch (error: any) {
-      console.log(error);
       setUploadSuccess(false);
       setUploadOccur(true);
       await timeout(5000);
@@ -135,7 +131,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   const handleFileRemove = async () => {
     try {
       if (typeof bill === "undefined") return;
-      await removeFile(bill?.id);
+      await removeFile(bill?.id, "bill");
       setDeleteOccur(true);
       setFileDeleted(true);
       await timeout(5000);
@@ -146,7 +142,6 @@ const BillForm: React.FC<BillFormProps> = (props) => {
 
       await timeout(5000);
       setDeleteOccur(false);
-      console.log(error);
     }
   };
 
@@ -320,8 +315,8 @@ const BillForm: React.FC<BillFormProps> = (props) => {
                 <Typography variant="h5" component="div" gutterBottom>
                   Keisti sąskaitos duomenis
                 </Typography>
+                <InputLabel>Suma</InputLabel>
                 <TextField
-                  label="Suma"
                   name="price"
                   type={"text"}
                   value={price}
@@ -442,7 +437,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
           </Box>
           <Box
             sx={{
-              width: 300,
+              width: 330,
               height: 100,
               borderRadius: 5,
               p: 2,
@@ -460,7 +455,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
               </Grid>
               <Grid item>
                 <Button variant="contained" onClick={handleDownload}>
-                  Parsiųsti PDF
+                  Peržiūrėti sąskaitą PDF
                 </Button>
               </Grid>
               <Grid item>

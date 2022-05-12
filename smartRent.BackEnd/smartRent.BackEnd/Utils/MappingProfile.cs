@@ -46,6 +46,17 @@ namespace smartRent.BackEnd.Utils
             CreateMap<RentDTO, Rent>().ForMember(x => x.Id, o => o.MapFrom(p => Guid.Parse(p.Id)))
                 .ForMember(x => x.StartingDate, o => o.MapFrom(p => DateTime.Parse(p.StartingDate)))
                 .ForMember(x => x.EndingDate, o => o.MapFrom(p => DateTime.Parse(p.EndingDate)));
+
+            CreateMap<DocumentDTO, Document>().ForMember(x => x.Id, o => o.MapFrom(p => Guid.Parse(p.Id)))
+                .ForMember(x => x.RentObjectId, o => o.MapFrom(p => Guid.Parse(p.RentObjectId)))
+                .ForMember(x => x.Type, n => n.MapFrom(
+                    z => (DocumentType) Enum.Parse(typeof(DocumentType), z.Type, true)));
+
+            CreateMap<Document, DocumentDTO>().ForMember(x => x.Id, o => o.MapFrom(p => p.Id.ToString()))
+                .ForMember(x => x.RentObjectId, o => o.MapFrom(p => p.RentObjectId.ToString()))
+                .ForMember(x => x.Type, o => o.MapFrom(p => p.Type.ToString()));
+
+
         }
     }
 }

@@ -26,13 +26,3 @@ export type BillTableItem = {
     endDate: string;
     tenantName: string;
 };
-
-export type BillFile = {
-    id: string;
-    file: File;
-}
-
-export type BillFileResponse = {
-    fileName: string;
-    file: Blob;
-}

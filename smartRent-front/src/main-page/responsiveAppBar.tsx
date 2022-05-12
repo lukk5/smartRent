@@ -20,8 +20,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import { useState, useEffect } from "react";
 import { User } from "../models/userModel";
 
-const pagesTenant = ["Pagrindinis", "Dokumentai", "Sąskaitos", "Pranešimai"];
-const pagesLandLord = ["Pagrindinis", "Nuomos objektai", "Nuomininkai", "Sąskaitos", "Pranešimai"];
+const pagesTenant = ["Pagrindinis", "Dokumentai", "Sąskaitos"];
+const pagesLandLord = ["Pagrindinis", "Nuomos objektai", "Sąskaitos", "Dokumentai"];
 const settings = ["Profilis", "Atsijungti"];
 let pages = ["","",""];
 

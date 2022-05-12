@@ -26,7 +26,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BillForRow } from "../../../models/billModel";
-import { DocumentListItem } from "../../../models/documentModel";
+import { DocumentTableItem } from "../../../models/documentModel";
 import { RentObject, Rent, RentDetail, RentHistoryItem } from "../../../models/rentObjectModel";
 import { User } from "../../../models/userModel";
 import { getByRentIdForRows } from "../../../service/billService";
@@ -60,7 +60,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
   const [openDialogTurnOff, setOpenDialogTurnOff] = useState<boolean>(false);
   const [openDialogRent, setOpenDialogRent] = useState<boolean>(false);
   const [title, setTitle] = useState<string | undefined>("");
-  const [documents, setDocuments] = useState<DocumentListItem[] | null>([]);
+  const [documents, setDocuments] = useState<DocumentTableItem[] | null>([]);
   const [dateForUpdate, setDateForUpdate] = useState<string>(new Date().toDateString());
   const [bills, setBills] = useState<BillForRow[] | null>([]);
   const [rentHistory, setRentHistory] = useState<RentHistoryItem[] | null>([]);
@@ -186,7 +186,6 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
       setUpdateOccur(false);
 
     } catch(error: any) {
-      console.log(error);
       setUpdateOccur(true);
       setUpdateSuccess(false);
       await timeout(5000);
@@ -218,7 +217,6 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
       setRent(update);
     }catch(error: any) {
-      console.log(error);
 
       setUpdateOccur(true);
       setUpdateSuccess(false);
@@ -245,7 +243,6 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
     };
 
     try {
-      console.log(rentHistory);
       await updateRent(update);
 
       setUpdateOccur(true);

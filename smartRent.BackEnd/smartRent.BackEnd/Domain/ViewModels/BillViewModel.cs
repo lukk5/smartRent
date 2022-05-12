@@ -18,16 +18,4 @@ namespace smartRent.BackEnd.Domain.ViewModels
         public string EndDate { get; set; }
         public string TenantName { get; set; }
     }
-
-    public class BillFile
-    {
-        public string Id { get; set; }
-        public IFormFile File { get; set; }
-    }
-
-    public class BillFileResponse
-    {
-        public string FileName { get; set; }
-        public byte[] File { get; set; }
-    }
 }

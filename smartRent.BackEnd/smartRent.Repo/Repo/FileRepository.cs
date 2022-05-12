@@ -9,9 +9,9 @@ namespace smartRent.Repo.Repo
     {
         private static readonly string FilesPath = Directory.GetCurrentDirectory() + "/data/";
         
-        public async Task<byte[]> GetFileContentByName(string fileName)
+        public byte[] GetFileContentByName(string fileName)
         {
-            return await File.ReadAllBytesAsync(FilesPath + fileName);
+            return File.ReadAllBytes(FilesPath + fileName);
         }
 
         public async Task WriteFile(IFormFile file, string fileName)
@@ -19,6 +19,13 @@ namespace smartRent.Repo.Repo
             var path = FilesPath + fileName;
             await using var stream = new FileStream(path, FileMode.Create);
             await file.CopyToAsync(stream);
+        }
+
+        public async Task WriteFile(byte[] file, string fileName)
+        {
+            var path = FilesPath + fileName;
+            await using var stream = new FileStream(path, FileMode.Create);
+            await stream.WriteAsync(file);
         }
 
         public void RemoveFileByName(string fileName)

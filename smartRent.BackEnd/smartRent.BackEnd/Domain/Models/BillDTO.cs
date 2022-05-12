@@ -4,6 +4,7 @@
     {
         public string Id { get; set; }
         public string RentId { get; set; }
+        public string RentObjectId { get; set; }
         public string Name { get; set; }
         public string Title { get; set; }
         public string TenantName { get; set; }

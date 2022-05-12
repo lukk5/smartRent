@@ -1,13 +1,34 @@
 import { apiUrl } from "../env";
 import {
   Bill,
-  BillFile,
-  BillFileResponse,
   BillForRow,
   BillTableItem,
 } from "../models/billModel";
 import axios from "axios";
 import unfetch from "unfetch";
+
+async function create(body:Bill) {
+  
+  const token = window.localStorage.getItem("token");
+
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  if (typeof body === "undefined") throw new Error("Body not exists.");
+
+  const response = await unfetch(`${apiUrl}bill/create`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(body)
+  })
+
+  if(response.status !== 200) throw new Error("Create unsuccessful.");
+}
 
 
 async function update(body:Bill) {
@@ -31,80 +52,6 @@ async function update(body:Bill) {
   })
 
   if(response.status !== 200) throw new Error("Update unsuccessful.");
-}
-
-async function removeFile(id: string) {
-  const token = window.localStorage.getItem("token");
-
-  if (token === null) {
-    throw new Error("Token not exists.");
-  }
-
-  if (typeof id === "undefined") throw new Error("User not exists.");
-
-  const response = await unfetch(`${apiUrl}bill/deleteFile/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (response.status !== 200) throw new Error("deleting was not completed.");
-}
-
-async function getFile(id: string | undefined): Promise<BillFileResponse> {
-  const token = window.localStorage.getItem("token");
-
-  if (token === null) {
-    throw new Error("Token not exists.");
-  }
-
-  if (typeof id === "undefined") throw new Error("User not exists.");
-
-  const response = await fetch(`${apiUrl}bill/getFile/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/pdf",
-    },
-  });
-
-  const responseName = await fetch(`${apiUrl}bill/getFileName/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  let result: BillFileResponse = await responseName.json();
-  result.file = await response.blob();
-
-  return result;
-}
-
-async function addFile(bill: BillFile) {
-  const token = window.localStorage.getItem("token");
-
-  if (token === null) {
-    throw new Error("Token not exists.");
-  }
-
-  if (typeof bill === "undefined" || bill === null)
-    throw new Error("User not exists.");
-
-  let formData = new FormData();
-
-  formData.append("id", bill.id);
-  formData.append("file", bill.file);
-
-  const response = await axios.post(`${apiUrl}bill/addFile`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (response.status !== 200) {
-    throw new Error("Unsuccessful upload");
-  }
 }
 
 async function getForRows(id: string | undefined): Promise<BillForRow[]> {
@@ -240,14 +187,31 @@ async function getTableItemsByUserId(
   return data as BillTableItem[];
 }
 
+async function removeBill(id: string) {
+  const token = window.localStorage.getItem("token");
+
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  const response = await axios.delete(`${apiUrl}bill/remove/${id}`,{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (response.status !== 200) {
+    throw new Error("Unsuccessful upload");
+  }
+};
+
+
 export {
   getForRows,
   getByRentIdForRows,
   getByRentId,
   getTableItemsByUserId,
   getById,
-  addFile,
-  getFile,
-  removeFile,
-  update
+  update,
+  removeBill,
+  create
 };

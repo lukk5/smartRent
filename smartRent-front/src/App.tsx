@@ -6,15 +6,15 @@ import DashBoard from "./pages/dashBoard";
 import { UserAuthResponse } from "./models/userAuthModel";
 import { User } from "./models/userModel";
 import ResponsiveAppBar from "./main-page/responsiveAppBar";
-import Documents from "./pages/documents";
+import DocumentComponent from "./pages/components/documents/documentComponent";
 import BillComponent from "./pages/components/bills/billComponent";
-import Messages from "./pages/messages";
 import Profile from "./pages/profile";
 import { RentObjectForNavBar } from "./models/rentObjectModel";
 import { getRentObjectForNavBarByUserId } from "./service/rentObjectService";
 import RentObjectComponent from "./pages/components/rentObject/rentObjectComponent";
 import RentObjectForm from "./pages/components/rentObject/rentObjectForm";
 import BillForm from "./pages/components/bills/billForm";
+import DocumentForm from "./pages/components/documents/documentForm";
 
 function App() {
   const [user, setUser] = useState<User | any>();
@@ -155,7 +155,7 @@ function App() {
         <Route path="/signOn" element={<SignOnForm />} />
         <Route
           path="/documents"
-          element={<Documents user={user} rentObject={rentObject} />}
+          element={<DocumentComponent user={user}/>}
         />
         <Route
           path="/home"
@@ -170,12 +170,6 @@ function App() {
         <Route
           path="/bills"
           element={<BillComponent user={user} updateLoginSucces={handleLoginSuccess} />}
-        />
-        <Route
-          path="/messages"
-          element={
-            <Messages user={user} updateLoginSucces={handleLoginSuccess} />
-          }
         />
         <Route 
           path="/rentObjects"
@@ -210,6 +204,8 @@ function App() {
         <Route
         path="bills/:id"
         element={<BillForm user={user}/>}/>
+        <Route path="documents/:id"
+        element={<DocumentForm user={user} />}/>
       </Routes>
     </BrowserRouter>
   );
