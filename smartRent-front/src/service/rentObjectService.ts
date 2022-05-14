@@ -12,7 +12,7 @@ async function getRentDetailsById(id:string | undefined): Promise<RentDetail | n
     throw new Error("Token not exists.");
   }
 
-  const response = await fetch(
+  let response = await fetch(
     `${apiUrl}rentObject/getRentDetailsById/${id}`,
     {
       method: "GET",
@@ -25,11 +25,9 @@ async function getRentDetailsById(id:string | undefined): Promise<RentDetail | n
 
   const data = await response.json();
 
-  if (response.status !== 200) {
-    throw new Error(data.error);
-  }
+  if(response.status !== 200) throw new Error(data.error);
+
   return data as RentDetail;
-  
 }
 
 
@@ -177,7 +175,6 @@ async function updateRentObject(rentObj:RentObject) {
   }
 }
 
-
 async function updateRent(rent:Rent) {
 
   const token = window.localStorage.getItem("token");
@@ -235,6 +232,91 @@ async function getRentsHistoryByObjectId(id: string) : Promise<RentHistoryItem[]
   return data as RentHistoryItem[];
 }
 
+async function createRentObject(rentObj:RentObject) {
+
+  const token = window.localStorage.getItem("token");
+  
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  console.log(rentObj);
+
+  if(typeof rentObj === "undefined") throw new Error("Body not exists.");
+
+  const response = await unfetch(
+    `${apiUrl}rentObject/createRentObject`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(rentObj)
+    }
+  );
+
+  if(response.status !== 200)
+  {
+    throw new Error("Create unsuccessful.");
+  }
+}
+
+async function deleteRentObjectById(id:string) {
+
+  const token = window.localStorage.getItem("token");
+  
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  if(typeof id === "undefined") throw new Error("Id not exists.");
+
+  const response = await unfetch(
+    `${apiUrl}rentObject/deleteRentObjectById/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    }
+  );
+
+  if(response.status !== 200)
+  {
+    throw new Error("Delete unsuccessful.");
+  }
+}
+
+async function createRent(rent: Rent)
+{
+  const token = window.localStorage.getItem("token");
+  
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  if(typeof rent === "undefined") throw new Error("Body not exists.");
+
+  const response = await unfetch(
+    `${apiUrl}rentObject/createRent`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(rent)
+    }
+  );
+
+  if(response.status !== 200)
+  {
+    throw new Error("Creating unsuccessful.");
+  }
+
+}
 
 export 
 {
@@ -245,5 +327,8 @@ export
   getRentDetailsById,
   updateRent,
   updateRentObject,
-  getRentsHistoryByObjectId
+  getRentsHistoryByObjectId,
+  createRentObject,
+  deleteRentObjectById,
+  createRent
 }

@@ -24,11 +24,14 @@ namespace smartRent.BackEnd.Controllers
         private readonly IRepository<Rent> _rentRepository;
         private readonly IRepository<Tenant> _tenantRepository;
         private readonly IRepository<LandLord> _landLordRepository;
+        private readonly IFileRepository _fileRepository;
         private readonly IRepository<Bills> _billRepository;
+        private readonly IRepository<Document> _documentRepository;
 
         public RentObjectController(IMapper mapper, IRepository<RentObject> repository,
             IRepository<LandLord> landLordRepository, IRepository<Tenant> tenantRepository,
-            IRepository<Rent> rentRepository, IRepository<Bills> billRepository)
+            IRepository<Rent> rentRepository, IRepository<Bills> billRepository, IFileRepository fileRepository,
+            IRepository<Document> documentRepository)
         {
             _mapper = mapper;
             _repository = repository;
@@ -36,41 +39,42 @@ namespace smartRent.BackEnd.Controllers
             _tenantRepository = tenantRepository;
             _rentRepository = rentRepository;
             _billRepository = billRepository;
+            _fileRepository = fileRepository;
+            _documentRepository = documentRepository;
         }
 
         [HttpGet]
         [Route("getRentDetailsById/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetRentDetails([FromRoute] string id)
         {
-            return await Try.Action(async () =>
+            var rent = await _rentRepository.GetAllAsync();
+            var targetRent = rent.SingleOrDefault(x => x.RentObjectId == Guid.Parse(id) && x.Active);
+
+            if (targetRent is null) return NotFound();
+
+            var tenant = await _tenantRepository.GetByIdAsync(targetRent.TenantId);
+
+            var bills = await _billRepository.GetAllAsync();
+
+            var targetBills = bills.Where(x => x.RentId == targetRent.Id);
+
+            var debtExist = false;
+
+            foreach (var bill in targetBills)
             {
-                var rent = await _rentRepository.GetAllAsync();
-                var targetRent = rent.SingleOrDefault(x => x.RentObjectId == Guid.Parse(id) && x.Active);
+                if (!bill.Paid && bill.ValidTo <= DateTime.Now) debtExist = true;
+            }
 
-                var tenant = await _tenantRepository.GetByIdAsync(targetRent.TenantId);
-
-                var bills = await _billRepository.GetAllAsync();
- 
-                var targetBills = bills.Where(x => x.RentId == targetRent.Id);
-
-                var debtExist = false;
-                
-                foreach (var bill in targetBills)
-                {
-                    if (!bill.Paid && bill.ValidTo <= DateTime.Now) debtExist = true;
-                }
-                
-                return Ok(new RentViewModel
-                {
-                    Id = targetRent.Id.ToString(),
-                    HasDebt = debtExist,
-                    TenantName = tenant.Name + " " + tenant.LastName
-                });
-                
-            }).Finally(10);
+            return Ok(new RentViewModel
+            {
+                Id = targetRent.Id.ToString(),
+                HasDebt = debtExist,
+                TenantName = tenant.Name + " " + tenant.LastName,
+                StartDate = targetRent.StartingDate.ToString("yyyy-MM-dd"),
+                EndDate = targetRent.EndingDate.ToString("yyyy-MM-dd")
+            });
         }
-        
+
 
         [HttpGet]
         [Route("getByLandLordId/{landLordId}")]
@@ -82,7 +86,7 @@ namespace smartRent.BackEnd.Controllers
                 var rentObjects = await _repository.GetAllAsync();
 
                 var rents = await _rentRepository.GetAllAsync();
-                
+
                 var dtos = _mapper.Map<IEnumerable<RentObject>, IEnumerable<RentObjectDTO>>(
                     rentObjects.Where(x => x.LandLordId == Guid.Parse(landLordId)));
 
@@ -114,18 +118,25 @@ namespace smartRent.BackEnd.Controllers
         }
 
         [HttpPost]
-        [Route("add")]
-        public async Task<IActionResult> Create([FromBody] RentObjectDTO rentObjectDto)
+        [Route("createRent")]
+        [Authorize]
+        public async Task<IActionResult> CreateRent([FromBody] RentDTO rentDto)
         {
-            return await Try.Action(async () =>
+            var rent = _mapper.Map<RentDTO, Rent>(rentDto);
+            
+            rent.CreatedAt = DateTime.Now;
+            rent.CreatedBy = "system";
+
+            var rents = await _rentRepository.GetAllAsync();
+
+            foreach (var currentRents in rents.Where(x=> x.Active && rent.RentObjectId == x.RentObjectId))
             {
-                var result = await _repository.CreateAsync(_mapper.Map<RentObjectDTO, RentObject>(rentObjectDto));
+                currentRents.Active = false;
+                await _rentRepository.UpdateAsync(currentRents);
+            }
 
-                if (result)
-                    return Ok();
-
-                throw new Exception();
-            }).Finally(10);
+            await _rentRepository.CreateAsync(rent);
+            return Ok();
         }
 
         [HttpGet]
@@ -141,7 +152,7 @@ namespace smartRent.BackEnd.Controllers
                 var rents = await _rentRepository.GetAllAsync();
 
                 var rent = rents.SingleOrDefault(x => x.RentObjectId == rentObject.Id && x.Active);
-                
+
                 return Ok(_mapper.Map<Rent, RentDTO>(rent));
             }).Finally(10);
         }
@@ -187,6 +198,60 @@ namespace smartRent.BackEnd.Controllers
             return Ok(result);
         }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteRentObjectById/{id}")]
+        public async Task<IActionResult> DeleteRentObjectById([FromRoute] string id)
+        {
+            var targetRentObject = await _repository.GetByIdAsync(Guid.Parse(id));
+
+            var rents = await _rentRepository.GetAllAsync();
+
+            var bills = await _billRepository.GetAllAsync();
+
+            var targetRents = rents.Where(x => x.RentObjectId == targetRentObject.Id);
+
+            foreach (var rent in targetRents)
+            {
+                var targetBills = bills.Where(x => x.RentId == rent.Id).ToList();
+
+                if (!targetBills.Any()) continue;
+                foreach (var bill in targetBills.Where(bill => bill.UniqueFileName is not null))
+                {
+                    _fileRepository.RemoveFileByName(bill.UniqueFileName);
+                }
+            }
+
+            var documents = await _documentRepository.GetAllAsync();
+
+            foreach (var targetDocument in documents.Where(x =>
+                x.RentObjectId == targetRentObject.Id && x.UniqueFileName is not null))
+            {
+                _fileRepository.RemoveFileByName(targetDocument.UniqueFileName);
+            }
+
+            await _repository.RemoveByIdAsync(targetRentObject.Id);
+
+            return Ok();
+        }
+
+
+        [HttpPost]
+        [Route("createRentObject")]
+        [Authorize]
+        public async Task<IActionResult> CreateRentObject([FromBody] RentObjectDTO rentObjectDto)
+        {
+            var rentObject = _mapper.Map<RentObjectDTO, RentObject>(rentObjectDto);
+
+            rentObject.CreatedAt = DateTime.Now;
+            rentObject.CreatedBy = "system";
+
+            await _repository.CreateAsync(rentObject);
+
+            return Ok();
+        }
+
+
         [HttpPut]
         [Route("updateRent")]
         [Authorize]
@@ -202,7 +267,7 @@ namespace smartRent.BackEnd.Controllers
                 targetRent.Active = rentDto.Active;
 
                 await _rentRepository.UpdateAsync(targetRent);
-                
+
                 return Ok();
             }).Finally(10);
         }
@@ -234,18 +299,24 @@ namespace smartRent.BackEnd.Controllers
         {
             return await Try.Action(async () =>
             {
-
                 var rents = await _rentRepository.GetAllAsync();
                 var tenants = await _tenantRepository.GetAllAsync();
                 var targetRents = rents.Where(x => x.RentObjectId == Guid.Parse(id) && !x.Active).ToList();
-                
-                var targetTenants = targetRents.Select(targetRent => tenants.SingleOrDefault(x => x.Id == targetRent.TenantId)).Where(tenant => tenant is not null).ToList();
+
+                var targetTenants = targetRents
+                    .Select(targetRent => tenants.SingleOrDefault(x => x.Id == targetRent.TenantId))
+                    .Where(tenant => tenant is not null).ToList();
                 var result = (from targetRent in
-                    targetRents let targetTenant = targetTenants.FirstOrDefault(x => x.Id == targetRent.TenantId) select (RentViewForTable) 
-                    new() {Id = targetRent.Id.ToString(), EndDate = targetRent.EndingDate.ToShortDateString(), TenantName = targetTenant.Name + " " + targetTenant.LastName}).ToList();
+                        targetRents
+                    let targetTenant = targetTenants.FirstOrDefault(x => x.Id == targetRent.TenantId)
+                    select (RentViewForTable)
+                        new()
+                        {
+                            Id = targetRent.Id.ToString(), EndDate = targetRent.EndingDate.ToShortDateString(),
+                            TenantName = targetTenant.Name + " " + targetTenant.LastName
+                        }).ToList();
                 return Ok(result);
             }).Finally(10);
         }
-        
     }
 }

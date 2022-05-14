@@ -1,7 +1,8 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Checkbox } from "@mui/material";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Checkbox, Button } from "@mui/material";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { RentObjectTableItem } from "../../../models/rentObjectModel";
+import { translateObjectTypeToLt } from "../../../utils/translator";
 import Loading  from "../../components/loading";
 
 interface RentObjectsTableProps 
@@ -9,6 +10,7 @@ interface RentObjectsTableProps
     data: RentObjectTableItem[]
     handleClick: (event: React.MouseEvent<unknown>, name: string) => void;
     isSelected: (name: string) => boolean;
+    handleOpen: (id: string) => void;
 }
 
 
@@ -60,8 +62,12 @@ export default function RentObjectsTable(props: RentObjectsTableProps) {
                   </TableCell>
                   <TableCell align="left">{row.address}</TableCell>
                   <TableCell align="left">{row.name}</TableCell>
-                  <TableCell align="left">{row.type}</TableCell>
+                  <TableCell align="left">{translateObjectTypeToLt(row.type)}</TableCell>
                   <TableCell align="left">{row.rentExist}</TableCell>
+                  <TableCell align="right">
+                    <Button variant="contained" onClick={()=> {props.handleOpen(row.id);}}>
+                      Atidaryti
+                      </Button></TableCell>
                 </TableRow>
               );
             })}

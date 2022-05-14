@@ -87,6 +87,16 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("getAllTenants")]
+    [Authorize]
+    public async Task<IActionResult> GetAllTenants()
+    {
+        IEnumerable<User> tenants = await _tenantRepo.GetAllAsync();
+        return Ok(_mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(tenants));
+    }
+    
+
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> LoginUser([FromBody] UserLogViewModel userLogLogin)

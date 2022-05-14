@@ -1,6 +1,7 @@
 import { User, UserContactDetails, UserPassword } from "../models/userModel";
 
 import unfetch from "unfetch";
+import { apiUrl }  from "../env"
 
 async function getUserById(
   id: string
@@ -12,7 +13,7 @@ async function getUserById(
   }
 
   const response = await fetch(
-    `http://localhost:27604/api/user/get/${id}`,
+    `${apiUrl}user/get/${id}`,
     {
       method: "GET",
       headers: {
@@ -38,7 +39,7 @@ async function checkOldPassword(user: UserPassword) {
   }
 
   const response = await unfetch(
-    `http://localhost:27604/api/user/checkOldPassword`,
+    `${apiUrl}user/checkOldPassword`,
     {
       method: "POST",
       headers: {
@@ -66,7 +67,7 @@ async function changeUserContactInfo(user: UserContactDetails) {
   }
 
   const response = await unfetch(
-    `http://localhost:27604/api/user/updateContactDetail`,
+    `${apiUrl}user/updateContactDetail`,
     {
       method: "PUT",
       headers: {
@@ -93,7 +94,7 @@ async function changeUserPassword(user: UserPassword) {
   }
 
   const response = await unfetch(
-    `http://localhost:27604/api/user/updatePassword`,
+    `${apiUrl}user/updatePassword`,
     {
       method: "PUT",
       headers: {
@@ -111,11 +112,37 @@ async function changeUserPassword(user: UserPassword) {
   }
 }
 
+async function getAllTenants() : Promise<User[]> {
+  const token = window.localStorage.getItem("token");
+
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  const response = await fetch(
+    `${apiUrl}user/getAllTenants`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    }
+  );
+
+  const data = await response.json();
+  if (response.status !== 200) {
+     throw new Error("Change unsusscesful.");
+  }
+  return data as User[];
+}
+
 
 export 
 {
   getUserById,
   changeUserPassword,
   changeUserContactInfo,
-  checkOldPassword
+  checkOldPassword,
+  getAllTenants
 }

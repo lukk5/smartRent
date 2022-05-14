@@ -7,6 +7,7 @@ import {
   TableCell,
   TableBody,
   Checkbox,
+  Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DocumentTableItem } from "../../../models/documentModel";
@@ -16,6 +17,7 @@ interface DocumentTableProps {
   data: DocumentTableItem[] | null;
   handleClick: (event: React.MouseEvent<unknown>, name: string) => void;
   isSelected: (name: string) => boolean;
+  handleOpen: (id: string) => void;
 }
 
 export default function DocumentTable(props: DocumentTableProps) {
@@ -33,6 +35,7 @@ export default function DocumentTable(props: DocumentTableProps) {
             <TableCell align="left">Pavadinimas</TableCell>
             <TableCell align="left">Tipas</TableCell>
             <TableCell align="center">Sukūrimo data</TableCell>
+            <TableCell align="right">&nbsp;&nbsp;</TableCell>
           </TableRow>
         </TableHead>
           <TableBody>
@@ -61,6 +64,9 @@ export default function DocumentTable(props: DocumentTableProps) {
                   <TableCell align="left">{row.name}</TableCell>
                   <TableCell align="left">{translateDocumentTypeToLt(row.type)}</TableCell>
                   <TableCell align="center">{row.date}</TableCell>
+                  <TableCell align="right">
+                    <Button variant="contained" onClick={()=> { props.handleOpen(row.id); }}> Atidaryti
+                      </Button></TableCell>
                 </TableRow>
               );
             })}

@@ -1,4 +1,4 @@
-export function translateDocumentTypeToLt(type: string) : string
+export function translateDocumentTypeToLt(type: string | undefined) : string
 {
   switch(type)
   {
@@ -10,13 +10,26 @@ export function translateDocumentTypeToLt(type: string) : string
 }
 
 
-export function translateDocumentTypeToEn(type: string) : string
+export function translateDocumentTypeToEn(type: string | undefined) : string
 {
   switch(type)
   {
     case "Sutartis": return "Contract";
     case "Inventorizacija": return "InventoryList";
     case "Kita": return "Other";
+    default: return "";
+  }
+}
+
+export function translateObjectTypeToLt(type: string | undefined) : string 
+{
+  switch(type)
+  {
+    case "House": return "Namas";
+    case "Apartment": return "Butas";
+    case "Garage": return "Garažas";
+    case "Vila": return "Vila";
+    case "ParkingPlace": return "Parkavimo vieta";
     default: return "";
   }
 }

@@ -67,6 +67,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
   let navigate = useNavigate();
 
   const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
+
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 
@@ -112,7 +113,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
 
   useEffect(() => {
     fetchBills();
-  }, [createSuccess]);
+  }, [createSuccess,deleteSuccess]);
 
   useEffect(() => {
     let result: [string, string][] = [];
@@ -193,7 +194,11 @@ const BillComponent: React.FC<UserProp> = (props) => {
   const handleRemove = async () => {
     setOpenDialogRemove(false);
     try {
-      await removeBill(selected[0]);
+      
+      selected.forEach(async (item) => {
+        await removeBill(item);
+      });
+
       setDeleteOccur(true);
       setDeleteSuccess(true);
       await timeout(5000);
@@ -243,22 +248,16 @@ const BillComponent: React.FC<UserProp> = (props) => {
         <Grid item xs={6} md={4} sx={{ marginRight: 40, marginBottom: 1 }}>
           <Box
             sx={{
-              width: 420,
+
+              width: 300,
               height: 40,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
-            <Button
-              variant="contained"
-              onClick={handleOpen}
-              sx={{ align: "center" }}
-            >
-              Atidaryti
-            </Button>
             <Button
               sx={{ marginLeft: 2 }}
               variant="contained"
@@ -403,15 +402,16 @@ const BillComponent: React.FC<UserProp> = (props) => {
               height: 800,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
-            }}
+              boxShadow: 5,
+            }} 
           >
             <BillTable
               data={tableItems}
               isSelected={isSelected}
               handleClick={handleClick}
+              handleOpen={handleOpen}
             />
           </Box>
         </Grid>

@@ -71,7 +71,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentId");
 
-                    b.ToTable("Bills");
+                    b.ToTable("Bills", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Credentials", b =>
@@ -103,7 +103,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Credentials");
+                    b.ToTable("Credentials", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Document", b =>
@@ -143,7 +143,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentObjectId");
 
-                    b.ToTable("Documents");
+                    b.ToTable("Documents", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.LandLord", b =>
@@ -178,7 +178,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LandLords");
+                    b.ToTable("LandLords", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Record", b =>
@@ -215,7 +215,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentId");
 
-                    b.ToTable("Records");
+                    b.ToTable("Records", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Rent", b =>
@@ -257,7 +257,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("Rents");
+                    b.ToTable("Rents", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.RentObject", b =>
@@ -306,7 +306,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("LandLordId");
 
-                    b.ToTable("RentObjects");
+                    b.ToTable("RentObjects", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Tenant", b =>
@@ -341,7 +341,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Bills", b =>

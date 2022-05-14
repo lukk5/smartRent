@@ -127,6 +127,7 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   };
 
   const handleTypeChange = (event: SelectChangeEvent) => {
+    console.log(event.target.value);
     setType(event.target.value);
   };
 
@@ -163,6 +164,11 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
                   Pavadinimas: {documentModel?.name}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Tipas: {translateDocumentTypeToLt(documentModel?.type)}
                 </Typography>
               </Grid>
               <Grid item>
@@ -209,10 +215,11 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
                   autoWidth
                   sx={{ maxHeight: 50, maxWidth: 300 }}
                 >
-                  <MenuItem value={0} selected={true}>
+                  <MenuItem value={"Sutartis"} selected={true}>
                     Sutartis
                   </MenuItem>
-                  <MenuItem value={1}>Inventorizacija</MenuItem>
+                  <MenuItem value={"Inventorizacija"}>Inventorizacija</MenuItem>
+                  <MenuItem value={"Kita"}>Kita</MenuItem>
                 </Select>
               </Grid>
               <Grid item xs={6} md={4}>

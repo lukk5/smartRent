@@ -4,6 +4,8 @@
     {
         public string Id { get; set; }
         public string TenantName { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public bool HasDebt { get; set; }
     }
 

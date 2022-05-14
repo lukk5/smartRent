@@ -8,6 +8,7 @@ using smartRent.BackEnd.Domain.Models;
 using smartRent.BackEnd.Domain.ViewModels;
 using smartRent.BackEnd.Utils;
 using smartRent.Repo.Entities;
+using smartRent.Repo.Enums;
 using smartRent.Repo.RepoInterfaces;
 using smartRent.Repo.Utils;
 
@@ -26,6 +27,28 @@ namespace smartRent.BackEnd.Controllers
             _mapper = mapper;
             _repository = repository;
             _fileRepository = fileRepository;
+        }
+        
+        [HttpPut]
+        [Authorize]
+        [Route("update")]
+        public async Task<IActionResult> Update([FromBody] DocumentDTO document)
+        {
+            return await Try.Action(async () =>
+            {
+                var targetDocument = await _repository.GetByIdAsync(Guid.Parse(document.Id));
+
+                if (targetDocument is not null)
+                {
+                    targetDocument.Type = Enum.Parse<DocumentType>(document.Type, true);
+                    targetDocument.Title = document.Title;
+                    await _repository.UpdateAsync(targetDocument);
+                }
+                else CustomException.ObjectNullException(targetDocument);
+                
+                return Ok();
+                
+            }).Finally(5);
         }
 
         [HttpDelete]

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using smartRent.Repo.RepoInterfaces;
@@ -30,7 +31,15 @@ namespace smartRent.Repo.Repo
 
         public void RemoveFileByName(string fileName)
         {
-            File.Delete(FilesPath + fileName);
+            try
+            {
+                File.Delete(FilesPath + fileName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+   
+            }
         }
     }
 }

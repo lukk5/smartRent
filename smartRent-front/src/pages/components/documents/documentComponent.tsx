@@ -35,14 +35,6 @@ import DocumentTable from "./documentTable";
 import { addFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
 
-function getStyles(name: string, personName: string[], theme: Theme) {
-  return {
-    fontWeight:
-      personName.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -144,6 +136,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
 
   useEffect(() => {
     fetchRentObjects();
+    fetchDocuments();
   }, [createSuccess]);
 
   useEffect(() => {
@@ -176,13 +169,19 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
     fetchRentObjects();
   }, [props]);
 
-  const handleOpen = () => {
-    navigate(`/documents/${selected}`);
+  const handleOpen = (id: string) => {
+    navigate(`/documents/${id}`);
   };
 
   const handleRemove = async () => {
     setConfirmDialogOpen(false);
     try{
+
+      selected.forEach(async()=> 
+      {
+
+      });
+
       await RemoveDocument(selected[0]);
       setDeleteOccur(true);
       setDeleteSuccess(true);
@@ -280,7 +279,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
             <Grid item xs={6}>
               <Box
                 sx={{
-                  width: 420,
+                  width: 310,
                   height: 40,
                   borderRadius: 5,
                   p: 2,
@@ -289,13 +288,6 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                   boxShadow: 3,
                 }}
               >
-                <Button
-                  variant="contained"
-                  onClick={handleOpen}
-                  sx={{ align: "center" }}
-                >
-                  Atidaryti
-                </Button>
                 <Button
                   sx={{ marginLeft: 2 }}
                   variant="contained"
@@ -468,6 +460,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                   data={documentList}
                   handleClick={handleClick}
                   isSelected={isSelected}
+                  handleOpen={handleOpen}
                 />
               }
             </Box>

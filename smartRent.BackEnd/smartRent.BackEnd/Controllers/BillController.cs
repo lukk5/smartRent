@@ -53,6 +53,7 @@ namespace smartRent.BackEnd.Controllers
                 bill.CreatedAt = DateTime.Now;
                 bill.CreatedBy = "system";
                 bill.RentId = targetRent.Id;
+                bill.PaymentDate = null;
 
                 await _billRepository.CreateAsync(bill);
                 

@@ -68,6 +68,7 @@ namespace smartRent.BackEnd.Controllers
 
         [HttpGet]
         [Route("getFileById/{id}/{type}")]
+        [Authorize]
         public async Task<IActionResult> GetFileById([FromRoute] string id, [FromRoute] string type)
         {
             switch (type)
@@ -83,7 +84,6 @@ namespace smartRent.BackEnd.Controllers
                 {
                     var targetBill = await _billRepository.GetByIdAsync(Guid.Parse(id));
                     var file = _fileRepository.GetFileContentByName(targetBill.UniqueFileName);
-                    //await _fileRepository.WriteFile(file, "baisusNiuhas.pdf"); 
                     return Ok(file);
                 }
                 default: return Ok();
@@ -156,11 +156,10 @@ namespace smartRent.BackEnd.Controllers
 
                 if (targetDocument is null) CustomException.ObjectNullException(targetDocument);
 
-                if (targetDocument.UniqueFileName is null) CustomException.ObjectNullException(targetDocument.UniqueFileName);
-                
-                _fileRepository.RemoveFileByName(targetDocument.UniqueFileName);
-
-                targetDocument.UniqueFileName = null;
+                if (targetDocument.UniqueFileName is not null)
+                {
+                    _fileRepository.RemoveFileByName(targetDocument.UniqueFileName);
+                }
 
                 await _documentRepository.UpdateAsync(targetDocument);
                 

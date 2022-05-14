@@ -1,7 +1,6 @@
 import unfetch from "unfetch";
 import {
   DocumentModel,
-  DocumentFile,
   DocumentTableItem,
 } from "../models/documentModel";
 import { apiUrl } from "../env";
@@ -36,7 +35,7 @@ async function getDocumentById(id: string | undefined): Promise<DocumentModel | 
 async function updateDocument(body:DocumentModel, file:FileModel) {
   
   const token = window.localStorage.getItem("token");
-
+  console.log(body)
   if (token === null) {
     throw new Error("Token not exists.");
   }
