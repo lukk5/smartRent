@@ -44,7 +44,8 @@ namespace smartRent.BackEnd.Controllers
         }
 
         [HttpGet]
-        [Route("getRentDetailsById/{id}")]
+        [Route("getRentDetailsByRentObjectId/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetRentDetails([FromRoute] string id)
         {
             var rent = await _rentRepository.GetAllAsync();
@@ -71,7 +72,41 @@ namespace smartRent.BackEnd.Controllers
                 HasDebt = debtExist,
                 TenantName = tenant.Name + " " + tenant.LastName,
                 StartDate = targetRent.StartingDate.ToString("yyyy-MM-dd"),
-                EndDate = targetRent.EndingDate.ToString("yyyy-MM-dd")
+                EndDate = targetRent.EndingDate.ToString("yyyy-MM-dd"),
+                TenantId = tenant.Id.ToString()
+            });
+        }
+
+        [HttpGet]
+        [Route("getRentDetailsById/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetRentDetailsById([FromRoute] string id)
+        {
+            var rent = await _rentRepository.GetByIdAsync(Guid.Parse(id));
+
+            if (rent is null) return NotFound();
+
+            var tenant = await _tenantRepository.GetByIdAsync(rent.TenantId);
+
+            var bills = await _billRepository.GetAllAsync();
+
+            var targetBills = bills.Where(x => x.RentId == rent.Id);
+
+            var debtExist = false;
+
+            foreach (var bill in targetBills)
+            {
+                if (!bill.Paid && bill.ValidTo <= DateTime.Now) debtExist = true;
+            }
+
+            return Ok(new RentViewModel
+            {
+                Id = rent.Id.ToString(),
+                HasDebt = debtExist,
+                TenantName = tenant.Name + " " + tenant.LastName,
+                StartDate = rent.StartingDate.ToString("yyyy-MM-dd"),
+                EndDate = rent.EndingDate.ToString("yyyy-MM-dd"),
+                TenantId = tenant.Id.ToString()
             });
         }
 
@@ -123,13 +158,13 @@ namespace smartRent.BackEnd.Controllers
         public async Task<IActionResult> CreateRent([FromBody] RentDTO rentDto)
         {
             var rent = _mapper.Map<RentDTO, Rent>(rentDto);
-            
+
             rent.CreatedAt = DateTime.Now;
             rent.CreatedBy = "system";
 
             var rents = await _rentRepository.GetAllAsync();
 
-            foreach (var currentRents in rents.Where(x=> x.Active && rent.RentObjectId == x.RentObjectId))
+            foreach (var currentRents in rents.Where(x => x.Active && rent.RentObjectId == x.RentObjectId))
             {
                 currentRents.Active = false;
                 await _rentRepository.UpdateAsync(currentRents);
@@ -163,15 +198,19 @@ namespace smartRent.BackEnd.Controllers
         [Authorize]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
-            return await Try.Action(async () =>
+            var rentObject = await _repository.GetByIdAsync(Guid.Parse(id));
+
+            if (rentObject is null) NotFound();
+
+            var rents = await _rentRepository.GetAllAsync();
+            
+            var rentObjectDto = _mapper.Map<RentObject, RentObjectDTO>(rentObject);
+
+            if (rents.Any(x => x.RentObjectId == rentObject.Id && x.Active))
             {
-                var rentObject = await _repository.GetByIdAsync(Guid.Parse(id));
-
-                if (rentObject is null)
-                    throw CustomException.ObjectNullException(rentObject);
-
-                return Ok(_mapper.Map<RentObject, RentObjectDTO>(rentObject));
-            }).Finally(10);
+                rentObjectDto.RentExist = true;
+            }
+            return Ok(rentObjectDto);
         }
 
         [HttpGet]

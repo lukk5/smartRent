@@ -328,16 +328,16 @@ const Profile: React.FC<UserProp> = (props) => {
   return (
     <div>
       <Grid container sx={{ margin: 5 }}>
-        <Grid item xs={6} md={4} sx={{ marginRight: 15 }}>
+        <Grid item xs={6} md={4} sx={{ marginRight: -10, marginLeft: 45 }}>
           <Box
             sx={{
               width: 400,
               height: 400,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             <Typography variant="h5" component="div" gutterBottom>
@@ -379,9 +379,9 @@ const Profile: React.FC<UserProp> = (props) => {
               height: 400,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             <Tabs

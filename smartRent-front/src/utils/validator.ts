@@ -35,3 +35,8 @@ export const isPhone = (phone: string): boolean => {
 
   return result;
 };
+
+export const isDate = (date: string): boolean => {
+  var parsedDate = Date.parse(date);
+  return !isNaN(parsedDate);
+};

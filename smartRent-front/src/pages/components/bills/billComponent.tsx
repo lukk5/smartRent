@@ -21,6 +21,7 @@ import { RentObject } from "../../../models/rentObjectModel";
 import { UserProp } from "../../../models/userModel";
 import {
   create,
+  getTableItemsByRentObjectId,
   getTableItemsByUserId,
   removeBill,
 } from "../../../service/billService";
@@ -30,6 +31,7 @@ import BillTable from "./billTable";
 import { v4 as uuidv4 } from "uuid";
 import { addFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
+import { isDate } from "../../../utils/validator";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -62,12 +64,20 @@ const BillComponent: React.FC<UserProp> = (props) => {
   const [allRentObjects, setAllRentObjects] = useState<[string, string][]>([]);
   const [rentObjects, setRentObjects] = useState<RentObject[]>([]);
   const [file, setFile] = useState<File>();
+  const [selectedRentObject, setSelectedRentObject] = useState<string>("");
+  const [selectedRentObjectId, setSelectedRentObjectId] = useState<string>("");
+  const [currency, setCurrency] = useState<string>("");
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [billType, setBillType] = useState<string>("");
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
   let navigate = useNavigate();
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
+  useEffect(() => {
+    fetchRentObjects();
+  }, [props]);
 
+  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 
@@ -86,6 +96,22 @@ const BillComponent: React.FC<UserProp> = (props) => {
     setSelected(newSelected);
   };
 
+  useEffect(() => {
+    if (hasError === true) {
+      timeout(5000);
+      setHasError(false);
+    }
+  }, [hasError]);
+
+  useEffect(() => {
+    let result: [string, string][] = [];
+    rentObjects.forEach((item) => {
+      result.push([item.id, item.name]);
+    });
+
+    setAllRentObjects(result);
+  }, [rentObjects]);
+
   const handleRentObjectChangeCreate = (
     event: SelectChangeEvent<typeof selectedRentObjectCreate>
   ) => {
@@ -99,7 +125,8 @@ const BillComponent: React.FC<UserProp> = (props) => {
 
   const fetchRentObjects = async () => {
     try {
-      if (typeof props.user === "undefined") return;
+      if (typeof props.user === "undefined" || props.user.userType === "tenant")
+        return;
       const result = await getRentObjectsListByLandLordId(props.user.id);
       if (result === null) return;
       setRentObjects(result);
@@ -113,7 +140,28 @@ const BillComponent: React.FC<UserProp> = (props) => {
 
   useEffect(() => {
     fetchBills();
-  }, [createSuccess,deleteSuccess]);
+  }, [props.targetRentObject]);
+
+  const handleRentObjectChange = (
+    event: SelectChangeEvent<typeof selectedRentObjectCreate>
+  ) => {
+    let value = event.target.value;
+    setSelectedRentObject(value);
+
+    allRentObjects.forEach((item) => {
+      if (item[1] === value) setSelectedRentObjectId(item[0]);
+    });
+  };
+
+  useEffect(() => {
+    if (allRentObjects.length === 0) return;
+    setSelectedRentObject(allRentObjects[0][1]);
+    setSelectedRentObjectId(allRentObjects[0][0]);
+  }, [allRentObjects]);
+
+  useEffect(() => {
+    fetchBills();
+  }, [createSuccess, deleteSuccess]);
 
   useEffect(() => {
     let result: [string, string][] = [];
@@ -127,16 +175,31 @@ const BillComponent: React.FC<UserProp> = (props) => {
   const fetchBills = async () => {
     try {
       if (props.user === undefined) return;
-      const billTableItems = await getTableItemsByUserId(props.user.id, "true");
-      setTableItems(billTableItems);
+
+      if (props.user.userType === "tenant") {
+        if (
+          props.targetRentObject === null ||
+          typeof props.targetRentObject === "undefined"
+        )
+          return;
+        const billTableItems = await getTableItemsByRentObjectId(
+          props.targetRentObject?.id,
+          "true"
+        );
+        console.log(props.targetRentObject?.id);
+        setTableItems(billTableItems);
+      } else {
+        const billTableItems = await getTableItemsByUserId(
+          props.user.id,
+          "true"
+        );
+        setTableItems(billTableItems);
+      }
     } catch (error: any) {}
   };
 
   useEffect(() => {
     fetchRentObjects();
-  }, [props]);
-
-  useEffect(() => {
     fetchBills();
   }, [props]);
 
@@ -146,7 +209,6 @@ const BillComponent: React.FC<UserProp> = (props) => {
 
   const handleCreateBill = async () => {
     try {
-
       let id = uuidv4();
 
       let createBill: Bill = {
@@ -157,21 +219,24 @@ const BillComponent: React.FC<UserProp> = (props) => {
         validFrom: new Date().toDateString(),
         validTo: endDate,
         tenantName: "",
+        tenantId: "",
         name: name,
         title: title,
         paymentDate: null,
-        fileExist: typeof file !== "undefined" ? true: false,
+        fileExist: typeof file !== "undefined" ? true : false,
+        objectName: "",
+        billType: "",
       };
 
       setOpenDialog(false);
       await create(createBill);
-      
+
       if (typeof file !== "undefined") {
         let fileAdd: FileModel = {
           id: id,
           file: file,
           fileName: "",
-          type: "bill"
+          type: "bill",
         };
         await addFile(fileAdd);
       }
@@ -194,7 +259,6 @@ const BillComponent: React.FC<UserProp> = (props) => {
   const handleRemove = async () => {
     setOpenDialogRemove(false);
     try {
-      
       selected.forEach(async (item) => {
         await removeBill(item);
       });
@@ -236,6 +300,17 @@ const BillComponent: React.FC<UserProp> = (props) => {
     setName(event.target.value);
   };
 
+  const handleInputBlur = () => {
+    validateInput();
+  };
+
+  const handleBillTypeChange = (event: SelectChangeEvent) => 
+  {
+    setBillType(event.target.value);
+  }
+
+  const validateInput = () => {};
+
   return (
     <div>
       <Grid
@@ -245,39 +320,81 @@ const BillComponent: React.FC<UserProp> = (props) => {
         direction={"column"}
         sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15 }}
       >
-        <Grid item xs={6} md={4} sx={{ marginRight: 40, marginBottom: 1 }}>
-          <Box
-            sx={{
-
-              width: 300,
-              height: 40,
-              borderRadius: 5,
-              p: 2,
-              border: 0,
-              borderColor: "#646BF5",
-              boxShadow: 5,
-            }}
+        {props.user?.userType !== "tenant" ? (
+          <Grid
+            container
+            alignItems={"center"}
+            direction={"row"}
+            spacing={2}
+            sx={{ marginBottom: 2, marginTop: 2 }}
           >
-            <Button
-              sx={{ marginLeft: 2 }}
-              variant="contained"
-              onClick={() => {
-                setOpenDialog(true);
-              }}
-            >
-              Sukurti sąskaita
-            </Button>
-            <Button
-              sx={{ marginLeft: 2, backgroundColor: "red" }}
-              variant="contained"
-              onClick={() => {
-                setOpenDialogRemove(true);
-              }}
-            >
-              Trinti
-            </Button>
-          </Box>
-        </Grid>
+            <Grid item xs={6} sx={{ marginLeft: 7 }}>
+              <Box
+                sx={{
+                  width: 300,
+                  height: 40,
+                  borderRadius: 5,
+                  p: 2,
+                  border: 0,
+                  borderColor: "#646BF5",
+                  boxShadow: 5,
+                }}
+              >
+                <Button
+                  sx={{ marginLeft: 2 }}
+                  variant="contained"
+                  onClick={() => {
+                    setOpenDialog(true);
+                  }}
+                >
+                  Sukurti sąskaita
+                </Button>
+                <Button
+                  sx={{ marginLeft: 2, backgroundColor: "red" }}
+                  variant="contained"
+                  onClick={() => {
+                    setOpenDialogRemove(true);
+                  }}
+                >
+                  Trinti
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={6} sx={{ marginLeft: -35 }}>
+              <Box
+                sx={{
+                  width: 340,
+                  height: 40,
+                  borderRadius: 5,
+                  p: 2,
+                  border: 0,
+                  borderColor: "#646BF5",
+                  boxShadow: 5,
+                }}
+              >
+                <Grid container>
+                  <InputLabel>Nuomos objektas: </InputLabel>
+                  <Select
+                    labelId="demo-multiple-name-label"
+                    id="demo-multiple-name"
+                    value={selectedRentObject}
+                    onChange={handleRentObjectChange}
+                    MenuProps={MenuProps}
+                    sx={{ minWidth: 180, maxHeight: 40, marginLeft: 2 }}
+                  >
+                    {rentObjects.map((object) => (
+                      <MenuItem key={object.id} value={object.name}>
+                        {object.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        ) : (
+          <></>
+        )}
         {openDialog ? (
           <Dialog
             open={openDialog}
@@ -340,6 +457,20 @@ const BillComponent: React.FC<UserProp> = (props) => {
                         {object.name}
                       </MenuItem>
                     ))}
+                  </Select>
+                  <InputLabel id="demo-multiple-name-label">
+                    Sąskaitos tipas
+                  </InputLabel>
+                  <Select
+                    labelId="demo-multiple-name-label"
+                    id="demo-multiple-name"
+                    value={billType}
+                    onChange={handleBillTypeChange}
+                    MenuProps={MenuProps}
+                    sx={{ minWidth: 180 }}
+                  >
+                    <MenuItem value={"Nuomos"}> Nuomos </MenuItem>
+                    <MenuItem value={"Kita"}> Kita </MenuItem>
                   </Select>
                   <Grid item>
                     <InputLabel>Suma</InputLabel>
@@ -405,7 +536,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
               border: 0,
               borderColor: "#646BF5",
               boxShadow: 5,
-            }} 
+            }}
           >
             <BillTable
               data={tableItems}

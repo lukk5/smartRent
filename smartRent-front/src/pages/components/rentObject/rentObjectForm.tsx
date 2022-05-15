@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { KeyboardReturnOutlined } from "@mui/icons-material";
 import {
   Grid,
   Box,
@@ -21,8 +20,7 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Alert,
-  InputLabel,
+  Alert
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -40,11 +38,16 @@ import { getDocumentsForList } from "../../../service/documentService";
 import {
   getRentByObjectId,
   getRentDetailsById,
+  getRentDetailsByRentObjectId,
   getRentObjectById,
   getRentsHistoryByObjectId,
   updateRent,
   updateRentObject,
 } from "../../../service/rentObjectService";
+import PersonIcon from '@mui/icons-material/Person';
+import { ProfileDialog } from "../profile/profileDialog";
+import { getUserById } from "../../../service/userService";
+import { translateDocumentTypeToLt, translateObjectTypeToLt } from "../../../utils/translator";
 
 interface RentObjectFormProps {
   user: User;
@@ -75,7 +78,8 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
   const [updateSuccess, setUpdateSuccess] = useState<boolean>(false);
   const [historyRent, setHistoryRent] = useState<RentDetail | null>(null);
   const [openDialogHistory, setOpenDialogHistory] = useState<boolean>(false);
-
+  const [openProfileDialog, setOpenProfileDialog] = useState<boolean>(false);
+  const [targetUser, setTargetUser] = useState<User>();
 
   const navigate = useNavigate();
 
@@ -88,7 +92,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
       if (rentObject !== null) {
         if (rentObject.rentExist) {
           setRent(await getRentByObjectId(id));
-          setRentDetail(await getRentDetailsById(id));
+          setRentDetail(await getRentDetailsByRentObjectId(id));
         }
         setRentHistory(await getRentsHistoryByObjectId(id));
       }
@@ -127,9 +131,9 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
 
 
   const handleOpenHistory = async(id: string) => {
-
     const rentHistory = await getRentDetailsById(id);
-    setRentHistory(rentHistory);
+    if(rentHistory === null) return;
+    setHistoryRent(rentHistory);
     setOpenDialogHistory(true);
   }
 
@@ -301,6 +305,18 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
     return [year, month, day].join("-");
   };
 
+  const handleOpenProfile = async(id: string | undefined) => {
+    if(typeof id === "undefined") return;
+    const user = await getUserById(id);
+    if(user === null) return;
+    setTargetUser(user);
+    setOpenDialogHistory(false);
+    setOpenProfileDialog(true);
+  };
+
+  const handleProfileDialogClose = () => {
+    setOpenProfileDialog(false);
+  }
   return (
     <div>
       <Grid
@@ -342,12 +358,12 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
               </Grid>
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
-                  Išmatavimai: {rentObject?.dimensions}
+                  Išmatavimai: {rentObject?.dimensions} m2
                 </Typography>
               </Grid>
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
-                  Tipas: {rentObject?.type}
+                  Tipas: {translateObjectTypeToLt(rentObject?.type)}
                 </Typography>
               </Grid>
               <Grid item>
@@ -368,6 +384,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
             </Grid>
           </Box>
         </Grid>
+        {openProfileDialog ? (<ProfileDialog user={targetUser} openDialog={openProfileDialog} setOpenDialogClose={handleProfileDialogClose}/>) : (<></>)}
         {openDialogHistory ? (
           <Dialog
             open={openDialogHistory}
@@ -388,68 +405,30 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                 sx={{ marginTop: -3 }}
               >
                 <Grid item xs={12}>
-                  <InputLabel>Nuomos objektas</InputLabel>
-                  <Select
-                    labelId="demo-multiple-name-label"
-                    id="demo-multiple-name"
-                    value={selectedRentObject}
-                    onChange={handleRentObjectChange}
-                    MenuProps={MenuProps}
-                    sx={{ minWidth: 180 }}
-                  >
-                    {rentObjects?.map((object) => (
-                      <MenuItem key={object.id} value={object.name}>
-                        {object.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-                <Grid item xs={12}>
-                  <InputLabel>Nuomininkas</InputLabel>
-                  <Select
-                    labelId="demo-multiple-name-label"
-                    id="demo-multiple-name"
-                    value={selectedTenant}
-                    onChange={handleTenantChange}
-                    MenuProps={MenuProps}
-                    sx={{ minWidth: 180 }}
-                  >
-                    {tenants?.map((object) => (
-                      <MenuItem key={object.id} value={object.name}>
-                        {object.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-                <Grid item xs={4}>
-                  <InputLabel>Pradžios data</InputLabel>
-                  <TextField
-                    margin="dense"
-                    id="startDate"
-                    type="date"
-                    fullWidth
-                    onChange={handleStartDateChange}
-                    variant="standard"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <InputLabel>Pabaigos data</InputLabel>
-                  <TextField
-                    margin="dense"
-                    id="endDate"
-                    type="date"
-                    fullWidth
-                    onChange={handleEndDateChange}
-                    variant="standard"
-                  />
-                </Grid>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Nuomininkas: {historyRent?.tenantName}
+                  { typeof historyRent?.tenantId !== "undefined" && historyRent?.tenantId !== "" ? ( <Button onClick={()=> {handleOpenProfile(historyRent?.tenantId)}}>
+                    <PersonIcon>
+                    </PersonIcon>
+                    </Button>) : (<></>)}
+                </Typography>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Pradžios data: {historyRent?.startDate}
+                </Typography>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Pabaigos data: {historyRent?.endDate}
+                </Typography>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Skolos: {historyRent?.hasDebt === true ? "Yra" : "Nėra"}
+                </Typography>
+              </Grid>
               </Grid>
             </DialogContent>
             <DialogActions>
               <Button
                 variant="contained"
                 onClick={() => {
-                  setOpenDialogRent(false);
+                  setOpenDialogHistory(false);
                 }}
               >
                 Uždaryti
@@ -641,6 +620,9 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                   <Grid item>
                     <Typography variant="h6" component="div" gutterBottom>
                       Nuomininkas: {rentDetail?.tenantName}
+                      {typeof rent?.tenantId  !== "undefined" && rent?.tenantId !== "" ? (  <Button onClick={()=> {handleOpenProfile(rent?.tenantId)}}>
+                        <PersonIcon></PersonIcon>
+                      </Button>) : (<></>)}
                     </Typography>
                   </Grid>
                   <Grid item>
@@ -871,7 +853,7 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
                           <Button
                             variant="outlined"
                             onClick={() => {
-                              handleOpenRent(row.id);
+                              handleOpenHistory(row.id);
                             }}
                           >
                             Atidaryti

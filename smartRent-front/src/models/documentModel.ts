@@ -1,4 +1,4 @@
-import { RentObjectForNavBar } from "./rentObjectModel";
+import { RentObject, RentObjectForNavBar } from "./rentObjectModel";
 import { User } from "./userModel";
 
 export type DocumentTableItem = {
@@ -20,6 +20,7 @@ export type DocumentModel = {
 
 export type DocumentProps = {
   user: User;  
+  targetRentObject: RentObject | undefined;
 }
 
 export type DocumentFile = {

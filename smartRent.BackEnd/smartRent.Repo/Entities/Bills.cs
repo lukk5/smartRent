@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using smartRent.Repo.Enums;
 
 namespace smartRent.Repo.Entities
 {
@@ -14,5 +14,6 @@ namespace smartRent.Repo.Entities
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
         public DateTime? PaymentDate { get; set; }
+        public BillType BillType { get; set; }
     }
 }

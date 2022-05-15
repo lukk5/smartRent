@@ -93,9 +93,20 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetAllTenants()
     {
         IEnumerable<User> tenants = await _tenantRepo.GetAllAsync();
-        return Ok(_mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(tenants));
+        var credentials = await _credRepository.GetAllAsync();
+        var result = new List<UserDTO>();
+        
+        foreach (var tenant in tenants)
+        {
+            var targetCred = credentials.SingleOrDefault(x => x.UserId == tenant.Id);
+            if (targetCred is null) continue;
+            var userDto = _mapper.Map<User, UserDTO>(tenant);
+            userDto.NickName = targetCred.NickName;
+            result.Add(userDto);
+        }
+        return Ok(result);
     }
-    
+
 
     [HttpPost]
     [Route("login")]
@@ -300,15 +311,28 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetUser([FromRoute] string id, [FromRoute] bool landLord)
     {
-        return await Try.Action(async () =>
+        var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ??
+                   (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
+
+        if (user is null) return NotFound();
+
+        var userDto = _mapper.Map<User, UserDTO>(user);
+
+        var credentials = await _credRepository.GetAllAsync();
+
+        var targetCredentials = credentials.SingleOrDefault(x => x.UserId == user.Id);
+
+        if (targetCredentials is null) return NotFound();
+
+        if (user.GetType() == typeof(Tenant))
         {
-            var user = await _landLordRepo.GetByIdAsync(Guid.Parse(id)) ??
-                       (User) await _tenantRepo.GetByIdAsync(Guid.Parse(id));
-
-            if (user is null) throw CustomException.ObjectNullException(user);
-
-            return Ok(_mapper.Map<User, UserDTO>(user));
-            
-        }).Finally(10);
+            userDto.UserType = "tenant";
+        }
+        else if(user.GetType() == typeof(LandLord))
+        {
+            userDto.UserType = "landLord";
+        }
+        userDto.NickName = targetCredentials.NickName;
+        return Ok(userDto);
     }
 }

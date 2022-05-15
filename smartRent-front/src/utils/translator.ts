@@ -33,3 +33,24 @@ export function translateObjectTypeToLt(type: string | undefined) : string
     default: return "";
   }
 }
+
+
+export function translateBillTypeToLt(type: string | undefined) : string 
+{
+  switch(type)
+  {
+    case "Rent": return "Nuomos";
+    case "Other": return "Kita";
+    default: return "";
+  }
+}
+
+export function translateBillTypeToEn(type: string | undefined) : string 
+{
+  switch(type)
+  {
+    case "Nuomos" : return "Rent";
+    case "Kita": return "Other";
+    default: return "";
+  }
+}

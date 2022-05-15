@@ -95,7 +95,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     if (rentObjects === null) return;
 
     tenants.forEach((item) => {
-      result.push([item.id, item.name]);
+      result.push([item.id, item.nickName]);
     });
     setAllTenants(result);
   },[tenants]);
@@ -571,8 +571,8 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
                     sx={{ minWidth: 180 }}
                   >
                     {tenants?.map((object) => (
-                      <MenuItem key={object.id} value={object.name}>
-                        {object.name}
+                      <MenuItem key={object.id} value={object.nickName}>
+                        {object.nickName}
                       </MenuItem>
                     ))}
                   </Select>

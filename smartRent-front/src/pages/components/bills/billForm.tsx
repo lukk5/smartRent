@@ -26,6 +26,10 @@ import {
 } from "../../../service/billService";
 import { addFile, getFile, removeFile } from "../../../service/fileService";
 import { DownloadFile } from "../../../utils/fileDownloader";
+import PersonIcon from '@mui/icons-material/Person';
+import { getUserById } from "../../../service/userService";
+import { ProfileDialog } from "../profile/profileDialog";
+import { translateBillTypeToLt } from "../../../utils/translator";
 
 interface BillFormProps {
   user: User;
@@ -52,6 +56,26 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   const [deleteOccur, setDeleteOccur] = useState<boolean>(false);
   const [updateOccur, setUpdateOccur] = useState<boolean>(false);
   const [uploadOccur, setUploadOccur] = useState<boolean>(false);
+  const [openProfileDialog, setOpenProfileDialog] = useState<boolean>(false);
+  const [targetUser, setTargetUser] = useState<User>(); 
+  const [billType, setBillType] = useState<string>("");
+  
+  const handleProfileDialogClose = () =>
+  {
+    setOpenProfileDialog(false);
+  }
+
+  const handleBillTypeChange = (event: SelectChangeEvent) => {
+    setBillType(event.target.value);
+  }
+
+  const handleOpenProfile = async(id: string | undefined) => {
+    if(typeof id === "undefined") return;
+    const user = await getUserById(id);
+    if(user === null) return;
+    setTargetUser(user);
+    setOpenProfileDialog(true);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +94,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
     setStatus(bill?.paid ? 0 : 1);
     setTitle(bill?.title);
     setPrice(bill?.amount.toString());
+    setBillType(translateBillTypeToLt(bill?.billType));
     setEndDate(bill?.validTo);
   };
 
@@ -158,11 +183,13 @@ const BillForm: React.FC<BillFormProps> = (props) => {
         validFrom: bill.validFrom,
         validTo: endDate,
         tenantName: bill.tenantName,
+        tenantId: bill.tenantId,
         name: bill.name,
         title: title,
-        paymentDate:
-          status === 0 ? formatDate(new Date().toDateString()) : null,
+        paymentDate: status === 0 ? formatDate(new Date().toDateString()) : null,
         fileExist: bill.fileExist,
+        objectName: bill.objectName,
+        billType: ""
       };
 
       setOpenDialog(false);
@@ -218,16 +245,17 @@ const BillForm: React.FC<BillFormProps> = (props) => {
         alignSelf={"center"}
         sx={{ marginTop: 2, marginLeft: 15, marginBottom: 10 }}
       >
-        <Grid item xs={4} md={4} sx={{ marginRight: 0 }}>
+        <Grid item xs={4} md={4} sx={{ marginLeft: ( props.user.userType === "tenant" ? 15 : 0 )}}>
+          {openProfileDialog ? (<ProfileDialog user={targetUser} openDialog={openProfileDialog} setOpenDialogClose={handleProfileDialogClose} ></ProfileDialog>) : (<></>) }
           <Box
             sx={{
               width: 400,
-              height: 610,
+              height: 710,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             {" "}
@@ -258,6 +286,15 @@ const BillForm: React.FC<BillFormProps> = (props) => {
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
                   Nuomininkas: {bill?.tenantName}
+                  <Button onClick={()=> { handleOpenProfile(bill?.tenantId)}}>
+                    <PersonIcon>
+                    </PersonIcon>
+                  </Button>
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" component="div" gutterBottom>
+                  Tipas: {translateBillTypeToLt(bill?.billType)}
                 </Typography>
               </Grid>
               <Grid item>
@@ -294,15 +331,15 @@ const BillForm: React.FC<BillFormProps> = (props) => {
           </Box>
         </Grid>
         <Grid item xs={4} md={4} sx={{ marginLeft: 0 }}>
-          <Box
+         {props.user.userType !== "tenant" ? ( <Box
             sx={{
               width: 400,
               height: 410,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             <Grid
@@ -403,22 +440,23 @@ const BillForm: React.FC<BillFormProps> = (props) => {
                 </Dialog>
               </Grid>
             </Grid>
-          </Box>
+          </Box>) : (<></>) }
         </Grid>
-        <Grid item xs={4} md={4}>
-          <Box
+        <Grid item xs={4} md={4} sx={{ marginLeft: ( props.user.userType === "tenant" ? -55 : 0 )}}>
+            {props.user.userType !== "tenant" ? (
+            <Box
             sx={{
-              width: 300,
+              width: 330,
               height: 100,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
-          >
-            <Grid container direction="column" alignItems={"left"} spacing={1}>
-              <Typography variant="h6" component="div" gutterBottom>
+          > 
+          <Grid container direction="column" alignItems={"left"} spacing={1}>
+          <Typography variant="h6" component="div" gutterBottom>
                 Įkelti sąskaitą
               </Typography>
               <Grid item>
@@ -434,16 +472,16 @@ const BillForm: React.FC<BillFormProps> = (props) => {
                 </Button>
               </Grid>
             </Grid>
-          </Box>
+            </Box>) : (<></>)}
           <Box
             sx={{
               width: 330,
               height: 100,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
               marginTop: 2,
             }}
           >
@@ -458,7 +496,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
                   Peržiūrėti sąskaitą PDF
                 </Button>
               </Grid>
-              <Grid item>
+              {props.user.userType !== "tenant" ? ( <Grid item>
                 <Button
                   variant="contained"
                   sx={{ backgroundColor: "red" }}
@@ -466,7 +504,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
                 >
                   Ištrinti
                 </Button>
-              </Grid>
+              </Grid>) : (<></>)}
             </Grid>
           </Box>
         </Grid>
@@ -504,5 +542,4 @@ const BillForm: React.FC<BillFormProps> = (props) => {
     </div>
   );
 };
-
 export default BillForm;

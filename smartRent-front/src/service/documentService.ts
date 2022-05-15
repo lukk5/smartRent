@@ -35,7 +35,6 @@ async function getDocumentById(id: string | undefined): Promise<DocumentModel | 
 async function updateDocument(body:DocumentModel, file:FileModel) {
   
   const token = window.localStorage.getItem("token");
-  console.log(body)
   if (token === null) {
     throw new Error("Token not exists.");
   }

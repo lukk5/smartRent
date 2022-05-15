@@ -71,8 +71,6 @@ const SignInForm: React.FC<LoginProp> = (props) => {
         password: logInDataLandLord.password,
       };
 
-
-
       // const loginUser: LoginUserBody = {
       //   nickName: userName,
       //   password: password,

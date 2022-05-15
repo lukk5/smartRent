@@ -7,6 +7,7 @@
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public bool HasDebt { get; set; }
+        public string TenantId { get; set; }
     }
 
     public class RentViewForTable

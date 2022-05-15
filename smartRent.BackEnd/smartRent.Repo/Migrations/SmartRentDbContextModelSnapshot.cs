@@ -31,6 +31,9 @@ namespace smartRent.Repo.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("BillType")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -71,7 +74,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentId");
 
-                    b.ToTable("Bills", (string)null);
+                    b.ToTable("Bills");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Credentials", b =>
@@ -103,7 +106,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Credentials", (string)null);
+                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Document", b =>
@@ -143,7 +146,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentObjectId");
 
-                    b.ToTable("Documents", (string)null);
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.LandLord", b =>
@@ -178,7 +181,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LandLords", (string)null);
+                    b.ToTable("LandLords");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Record", b =>
@@ -215,7 +218,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("RentId");
 
-                    b.ToTable("Records", (string)null);
+                    b.ToTable("Records");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Rent", b =>
@@ -257,7 +260,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("Rents", (string)null);
+                    b.ToTable("Rents");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.RentObject", b =>
@@ -306,7 +309,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasIndex("LandLordId");
 
-                    b.ToTable("RentObjects", (string)null);
+                    b.ToTable("RentObjects");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Tenant", b =>
@@ -341,7 +344,7 @@ namespace smartRent.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tenants", (string)null);
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("smartRent.Repo.Entities.Bills", b =>

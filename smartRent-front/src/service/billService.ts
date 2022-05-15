@@ -187,6 +187,38 @@ async function getTableItemsByUserId(
   return data as BillTableItem[];
 }
 
+async function getTableItemsByRentObjectId(
+  id: string,
+  status: string
+): Promise<BillTableItem[] | null> {
+  const token = window.localStorage.getItem("token");
+
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  if (typeof id === "undefined") throw new Error("User not exists.");
+
+  const response = await fetch(
+    `${apiUrl}bill/getTableItemsByRentObjectId/${id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (response.status !== 200) {
+    throw new Error(data.error);
+  }
+  return data as BillTableItem[];
+}
+
+
 async function removeBill(id: string) {
   const token = window.localStorage.getItem("token");
 
@@ -213,5 +245,6 @@ export {
   getById,
   update,
   removeBill,
-  create
+  create,
+  getTableItemsByRentObjectId
 };

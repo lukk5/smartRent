@@ -15,43 +15,74 @@ import { useNavigate } from "react-router-dom";
 import logo from "../image/smartRentHeader.png";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
-import { RentObjectForNavBar } from "../models/rentObjectModel";
+import { RentObject } from "../models/rentObjectModel";
 import HomeIcon from "@mui/icons-material/Home";
 import { useState, useEffect } from "react";
 import { User } from "../models/userModel";
+import { getByTenantId } from "../service/rentObjectService";
 
 const pagesTenant = ["Pagrindinis", "Dokumentai", "Sąskaitos"];
-const pagesLandLord = ["Pagrindinis", "Nuomos objektai", "Sąskaitos", "Dokumentai"];
+const pagesLandLord = [
+  "Pagrindinis",
+  "Nuomos objektai",
+  "Sąskaitos",
+  "Dokumentai",
+];
 const settings = ["Profilis", "Atsijungti"];
-let pages = ["","",""];
+let pages = ["", "", ""];
 
 const ITEM_HEIGHT = 48;
 
 interface AppBarProps {
   logOut: () => void;
-  handleRentObjectChange: (rentObject: RentObjectForNavBar) => void;
-  rentObjects?: RentObjectForNavBar[];
-  meniuItems: string[];
   user: User;
+  handleRentObjectChange: (object: RentObject) => void;
 }
 
 const ResponsiveAppBar = (props: AppBarProps) => {
   const navigate = useNavigate();
-  const [meniuItems, setMeniuItems] = useState<string[]>(props.meniuItems);
-  const [rentObjects, setRentObjects] = useState<
-    RentObjectForNavBar[] | undefined
-  >(props.rentObjects);
+  const [meniuItems, setMeniuItems] = useState<string[]>([]);
+  const [rentObjects, setRentObjects] = useState<RentObject[] | null>([]);
+  const [defaultSet, setDefaultSet] = useState<boolean>(false);
 
-
-  useEffect(()=> {
-    if(props.user.userType === "tenant")
-    {
+  useEffect(() => {
+    if (props.user.userType === "tenant") {
       pages = pagesTenant;
     } else {
       pages = pagesLandLord;
     }
-  },[]);
+  }, []);
 
+  useEffect(() => {
+    getTenantRentObjects();
+  }, [props]);
+
+  useEffect(() => {
+    setMeniu(rentObjects);
+  }, [rentObjects]);
+
+  const getTenantRentObjects = async () => {
+    if (props.user.userType !== "tenant") return;
+    const data = await getByTenantId(props.user.id);
+
+    if (!defaultSet) {
+      props.handleRentObjectChange(data[0]);
+    }
+
+    setRentObjects(data);
+  };
+
+  const setMeniu = (items: RentObject[] | null) => {
+    let itemsForMeniu: string[] = [];
+
+    if (items === null) return null;
+
+    items.forEach((item) => {
+      itemsForMeniu.push(item.name);
+    });
+
+    setMeniuItems(itemsForMeniu);
+  };
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -115,27 +146,18 @@ const ResponsiveAppBar = (props: AppBarProps) => {
         navigate("/tenants");
         break;
       case "Nuomos objektai":
-        navigate("/rentObjects")
+        navigate("/rentObjects");
         break;
     }
   };
 
   const handleRentObjectClick = (object: string) => {
-
-    let rentObjectas: RentObjectForNavBar = {
-      id: "",
-      name: ""
-    };
-
-    rentObjects?.forEach((item) => 
-    {
-        if(item.name === object)
-        {
-          rentObjectas = item;
-        }
+    setDefaultSet(true);
+    rentObjects?.forEach((item) => {
+      if (item.name === object) {
+        props.handleRentObjectChange(item);
+      }
     });
-
-    props.handleRentObjectChange(rentObjectas);
   };
 
   return (
@@ -201,15 +223,7 @@ const ResponsiveAppBar = (props: AppBarProps) => {
               ))}
             </Menu>
           </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
-          >
-            LOGO
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: "center", md: "flex" } }}>
             {pages.map((page) => (
               <Button
                 key={page}
@@ -222,45 +236,61 @@ const ResponsiveAppBar = (props: AppBarProps) => {
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton
-              aria-label="more"
-              id="long-button"
-              aria-controls={open ? "long-menu" : undefined}
-              aria-expanded={open ? "true" : undefined}
-              aria-haspopup="true"
-              onClick={handleClickOnRentObject}
-            >
-              <HomeIcon />
-            </IconButton>
+          { props.user.userType === "tenant" ? (<Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Nuomos objektas">
+              <IconButton
+                aria-label="more"
+                id="long-button"
+                aria-controls={open ? "long-menu" : undefined}
+                aria-expanded={open ? "true" : undefined}
+                aria-haspopup="true"
+                onClick={handleClickOnRentObject}
+                hidden={props.user.userType !== "tenant"}
+              >
+                <HomeIcon />
+              </IconButton>
+            </Tooltip>
             {props.user.userType === "tenant" ? (
-            <Menu
-              id="long-menu"
-              MenuListProps={{
-                "aria-labelledby": "long-button",
-              }}
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleCloseOnRentObject}
-              PaperProps={{
-                style: {
-                  maxHeight: ITEM_HEIGHT * 4.5,
-                  width: "20ch",
-                },
-              }}
-            >
-              {meniuItems.map((option) => (
-                <MenuItem
-                  key={option}
-                  selected={option === "Pyxis"}
-                  onClick={handleCloseOnRentObject}
-                >
-                  <Button sx={{ textTransform: "none" }} onClick={() => {handleRentObjectClick(option);}}>{option}</Button>
-                </MenuItem>
-              ))}
-            </Menu> ) : (<></>) }
-            <Tooltip title="Open settings">
+              <Menu
+                id="long-menu"
+                MenuListProps={{
+                  "aria-labelledby": "long-button",
+                }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleCloseOnRentObject}
+                PaperProps={{
+                  style: {
+                    maxHeight: ITEM_HEIGHT * 4.5,
+                    width: "20ch",
+                  },
+                }}
+              >
+                {meniuItems.map((option) => (
+                  <MenuItem
+                    key={option}
+                    selected={option === "Pyxis"}
+                    onClick={handleCloseOnRentObject}
+                  >
+                    <Button
+                      sx={{ textTransform: "none" }}
+                      onClick={() => {
+                        handleRentObjectClick(option);
+                      }}
+                    >
+                      {option}
+                    </Button>
+                  </MenuItem>
+                ))}
+              </Menu>
+            ) : (
+              <></>
+            )}
+          </Box>)
+          : (<></>)
+          }
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Vartotojo nustatymai">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <AccountCircleIcon fontSize="large" />
               </IconButton>

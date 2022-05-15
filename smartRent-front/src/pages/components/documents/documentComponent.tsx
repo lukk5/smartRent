@@ -139,6 +139,10 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
     fetchDocuments();
   }, [createSuccess]);
 
+  useEffect(()=> {
+    fetchDocuments();
+  }, [props.targetRentObject]);
+
   useEffect(() => {
     let result: [string, string][] = [];
     rentObjects.forEach((item) => {
@@ -155,10 +159,21 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
   }, [allRentObjects]);
 
   const fetchDocuments = async () => {
-    try {
-      const response = await getDocumentsForList(selectedRentObjectId);
-      setDocumentList(response);
-    } catch (error: any) {}
+
+    if(props.user.userType !== "tenant")
+    {
+      try {
+        const response = await getDocumentsForList(selectedRentObjectId);
+        setDocumentList(response);
+      } catch (error: any) {}
+    } else 
+    {
+      try {
+        if(props.targetRentObject === null || typeof props.targetRentObject === "undefined") return;
+        const response = await getDocumentsForList(props.targetRentObject?.id);
+        setDocumentList(response);
+      } catch (error: any) {}
+    }
   };
 
   useEffect(() => {
@@ -177,12 +192,11 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
     setConfirmDialogOpen(false);
     try{
 
-      selected.forEach(async()=> 
+      selected.forEach(async(id)=> 
       {
-
+        await RemoveDocument(id);
       });
 
-      await RemoveDocument(selected[0]);
       setDeleteOccur(true);
       setDeleteSuccess(true);
       await timeout(5000);
@@ -266,9 +280,11 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
         alignItems="center"
         justifyContent="center"
         direction={"column"}
-        sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15 }}
+        spacing={2}
+        sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 12}}
       >
-        <Grid item xs={4}>
+       <Grid item xs={4}>
+          {props.user.userType !== "tenant" ? 
           <Grid
             container
             alignItems={"center"}
@@ -283,9 +299,9 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                   height: 40,
                   borderRadius: 5,
                   p: 2,
-                  border: 1,
+                  border: 0,
                   borderColor: "#646BF5",
-                  boxShadow: 3,
+                  boxShadow: 5,
                 }}
               >
                 <Button
@@ -305,17 +321,17 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                   Trinti
                 </Button>
               </Box>
-            </Grid>
-            <Grid item xs={6}>
+            </Grid> 
+            <Grid item xs={6} sx={{marginLeft : -10}}>
               <Box
                 sx={{
                   width: 340,
                   height: 40,
                   borderRadius: 5,
                   p: 2,
-                  border: 1,
+                  border: 0,
                   borderColor: "#646BF5",
-                  boxShadow: 3,
+                  boxShadow: 5,
                 }}
               >
                 <Grid container>
@@ -337,7 +353,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                 </Grid>
               </Box>
             </Grid>
-          </Grid>
+          </Grid> : (<></>)}
           {openDialog ? (
             <Dialog open={openDialog} onClose={handleDialogClose}>
               <DialogTitle>Sukurti dokumentą</DialogTitle>
@@ -450,9 +466,9 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                 height: 800,
                 borderRadius: 5,
                 p: 2,
-                border: 1,
+                border: 0,
                 borderColor: "#646BF5",
-                boxShadow: 3,
+                boxShadow: 5,
               }}
             >
               {
@@ -465,7 +481,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
               }
             </Box>
           </Grid>
-        </Grid>
+        </Grid> 
         <Box sx={{align: "left", marginLeft: -25 , marginTop: 15}}>
         {createSuccess === false && createOccur === true ? (
           <Alert severity="error">Sukūrimas nesėkmingas.</Alert>

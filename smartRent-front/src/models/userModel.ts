@@ -1,3 +1,4 @@
+import { RentObject } from "./rentObjectModel";
 import { UserAuthResponse } from "./userAuthModel";
 
 export type User = {
@@ -12,6 +13,7 @@ export type User = {
 
 export interface UserProp {
   user : User | undefined;
+  targetRentObject?: RentObject | undefined;
   updateLoginSucces: ()=> void;
   updateUser?: (user: User) => void;
   logOut?: ()=> void;

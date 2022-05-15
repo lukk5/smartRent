@@ -32,6 +32,7 @@ import {
   translateDocumentTypeToLt,
 } from "../../../utils/translator";
 
+
 interface DocumentFormProps {
   user: User;
 }
@@ -54,7 +55,6 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await getDocumentById(id);
-      console.log(response);
       if (response !== null) setDocument(response);
     };
     fetchData();
@@ -76,7 +76,6 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
 
       const result = await getFile(documentModel.id, "document");
 
-      console.log(result);
       if (result === null) return;
 
       DownloadFile(result.file, result.fileName);
@@ -127,7 +126,6 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   };
 
   const handleTypeChange = (event: SelectChangeEvent) => {
-    console.log(event.target.value);
     setType(event.target.value);
   };
 
@@ -139,16 +137,16 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
         alignSelf={"center"}
         sx={{ marginTop: 2, marginLeft: 15, marginBottom: 10 }}
       >
-        <Grid item xs={4} md={4} sx={{ marginRight: 0 }}>
+        <Grid item xs={4} md={4} sx={{ marginRight:  0 , marginLeft: props.user.userType !== "tenant" ? 0 : 45}}>
           <Box
             sx={{
               width: 400,
               height: 310,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             {" "}
@@ -184,16 +182,16 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
             </Grid>
           </Box>
         </Grid>
-        <Grid item xs={4} md={4} sx={{ marginLeft: 0 }}>
+        {props.user.userType !== "tenant" ? (  <Grid item xs={4} md={4} sx={{ marginLeft: 0 }}>
           <Box
             sx={{
               width: 400,
               height: 410,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             <Grid
@@ -284,7 +282,7 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
               </Grid>
             </Grid>
           </Box>
-        </Grid>
+        </Grid>) : (<></>)}
         <Grid item xs={4} md={4}>
           <Box
             sx={{
@@ -292,9 +290,9 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
               height: 100,
               borderRadius: 5,
               p: 2,
-              border: 1,
+              border: 0,
               borderColor: "#646BF5",
-              boxShadow: 3,
+              boxShadow: 5,
             }}
           >
             <Grid container direction="row" alignItems={"left"} spacing={1}>

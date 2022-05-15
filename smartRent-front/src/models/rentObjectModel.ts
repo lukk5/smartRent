@@ -45,6 +45,7 @@ export type RentHistoryItem = {
 export type RentDetail  = {
     id: string;
     tenantName: string;
+    tenantId: string;
     startDate: string;
     endDate: string;
     hasDebt: boolean;

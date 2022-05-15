@@ -1,54 +1,25 @@
 import { useEffect, useState } from "react";
 import { User, UserProp } from "../models/userModel";
+import { LandLordDashBoard } from "./components/dashBoards/landLordDashBoard";
+import { TenantDashBoard } from "./components/dashBoards/tenantDashBoard";
 
 const DashBoard: React.FC<UserProp> = (props) => {
   const [user, setUser] = useState<User>();
-
   useEffect(() => {
-    loadUserIfNotExist();
-  }, []);
+    setUser(props.user);
+  }, [props]);
 
-  const getDashBoardData = () => {
-  };
+  useEffect(()=> {
+    getDashBoardData();
+  }, [user]);
 
-  const loadUserIfNotExist = () => {
-    if (user !== undefined) return;
-
-    const userString = window.localStorage.getItem("user");
-
-    if (userString === null) throw Error("User not exist in local storage.");
-
-    let userr = JSON.parse(userString);
-
-    setUser(userr);
-    props.updateLoginSucces();
-
-    if(props.reloadRentObject !== undefined)
-    {
-      props.reloadRentObject();
-    }
+  const getDashBoardData = async () => {
 
   };
 
-  getDashBoardData();
-
-
-  const returnTenantBoard = () => {
-    return <></>;
-  };
-
-
-  const returnLandLordBoard = () => {
-    return <></>;
-  };
-
-  getDashBoardData();
-
-  if (user?.userType === "landLord") {
-    return returnLandLordBoard();
-  } else {
-    return returnTenantBoard();
-  }
+  return (<div>
+    {user?.userType === "tenant" ? (<TenantDashBoard user={user} targetRentObject={props.targetRentObject} />) : (<LandLordDashBoard user={user}></LandLordDashBoard>)}
+  </div>);
 };
 
 export default DashBoard;

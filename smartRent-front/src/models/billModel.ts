@@ -6,10 +6,13 @@ export type Bill = {
     validFrom: string;
     validTo: string;
     tenantName: string;
+    tenantId: string;
     name: string;
     title: string;
     paymentDate: string | null;
     fileExist: boolean;
+    objectName: string;
+    billType: string;
 };
 
 export type BillForRow = {
