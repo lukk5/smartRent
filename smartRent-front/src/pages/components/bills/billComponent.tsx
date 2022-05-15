@@ -32,6 +32,7 @@ import { v4 as uuidv4 } from "uuid";
 import { addFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
 import { isDate } from "../../../utils/validator";
+import { translateBillTypeToEn } from "../../../utils/translator";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -123,6 +124,10 @@ const BillComponent: React.FC<UserProp> = (props) => {
     });
   };
 
+  useEffect(()=> {
+    fetchBills();
+  },[selectedRentObjectId])
+
   const fetchRentObjects = async () => {
     try {
       if (typeof props.user === "undefined" || props.user.userType === "tenant")
@@ -189,8 +194,8 @@ const BillComponent: React.FC<UserProp> = (props) => {
         console.log(props.targetRentObject?.id);
         setTableItems(billTableItems);
       } else {
-        const billTableItems = await getTableItemsByUserId(
-          props.user.id,
+        const billTableItems = await getTableItemsByRentObjectId(
+          selectedRentObjectId,
           "true"
         );
         setTableItems(billTableItems);
@@ -225,7 +230,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
         paymentDate: null,
         fileExist: typeof file !== "undefined" ? true : false,
         objectName: "",
-        billType: "",
+        billType: translateBillTypeToEn(billType),
       };
 
       setOpenDialog(false);
@@ -328,7 +333,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
             spacing={2}
             sx={{ marginBottom: 2, marginTop: 2 }}
           >
-            <Grid item xs={6} sx={{ marginLeft: 7 }}>
+            <Grid item xs={6} sx={{ marginLeft: 11 }}>
               <Box
                 sx={{
                   width: 300,

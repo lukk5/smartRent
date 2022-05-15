@@ -327,7 +327,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
       <Grid item xs={6} md={4} sx={{ marginRight: 45, marginBottom: 1 }}>
         <Box
           sx={{
-            width: 380,
+            width: 515,
             height: 40,
             borderRadius: 5,
             p: 2,
@@ -343,7 +343,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
               setOpenDialog(true);
             }}
           >
-            Sukurti
+            Sukurti nuomos objektą
           </Button>
           <Button
             sx={{ marginLeft: 2 }}
