@@ -15,8 +15,9 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bill } from "../../../models/billModel";
+import { ProfitModel } from "../../../models/profitModel";
 import { User } from "../../../models/userModel";
-import { getNotPaidBillsByLandLordId } from "../../../service/dashboardService";
+import { getNotPaidBillsByLandLordId, getProfit } from "../../../service/dashboardService";
 
 interface DashBoardProps {
   user: User | undefined;
@@ -24,10 +25,15 @@ interface DashBoardProps {
 
 export const LandLordDashBoard = (props: DashBoardProps) => {
   const [notPaidBills, setNotPaidBills] = useState<Bill[] | null>([]);
+  const [profitModel, setProfitModel] = useState<ProfitModel | null>();
+  const [inCome, setIncome ] = useState<number>(0);
+  const [outCome, setoutCome ] = useState<number>(0);
+
   let navigate = useNavigate();
 
   useEffect(() => {
     getNotPaidBills();
+    getProfitData();
   }, [props]);
 
   const getNotPaidBills = async () => {
@@ -38,6 +44,17 @@ export const LandLordDashBoard = (props: DashBoardProps) => {
 
     setNotPaidBills(data);
   };
+
+  const getProfitData = async () => {
+    if (typeof props.user === "undefined") return;
+    const data = await getProfit(props.user.id);
+
+    if (data === null) return;
+
+    setProfitModel(data);
+    setIncome(data.allIncome);
+    setoutCome(data.allBillsOutcome);
+  }
 
   const handleOpen = (id: string) => {
     navigate(`/bills/${id}`);
@@ -112,7 +129,18 @@ export const LandLordDashBoard = (props: DashBoardProps) => {
           </Typography>
           <Grid container>
             <Box>
-                
+            <Typography variant="h3" component="div" gutterBottom sx={{marginTop: 4, color: profitModel?.positive ? "0a0a0a" : "#cf1f2e"}}>
+            { inCome - outCome  } EUR
+          </Typography>
+            <Typography variant="body1" component="div" gutterBottom sx={{marginTop: 6}}>
+            Gautos pajamos iš nuomų: {profitModel?.allIncome} Eur
+          </Typography>
+          <Typography variant="body1" component="div" gutterBottom sx={{marginTop: 1}}>
+            Mokesčiai už komunalines paslaugas ir kitą: {profitModel?.allBillsOutcome} Eur
+          </Typography>
+          <Typography variant="body1" component="div" gutterBottom sx={{marginTop: 1}}>
+           Nesumokėtos sąskaitos: {profitModel?.countNotPaid} 
+          </Typography>
             </Box>
           </Grid>
         </Box>

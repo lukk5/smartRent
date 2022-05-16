@@ -30,6 +30,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { getUserById } from "../../../service/userService";
 import { ProfileDialog } from "../profile/profileDialog";
 import { translateBillTypeToLt } from "../../../utils/translator";
+import AlertDialog from "../others/alertDialog";
 
 interface BillFormProps {
   user: User;
@@ -59,6 +60,9 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   const [openProfileDialog, setOpenProfileDialog] = useState<boolean>(false);
   const [targetUser, setTargetUser] = useState<User>(); 
   const [billType, setBillType] = useState<string>("");
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertTitle, setAlertTitle] = useState<string>("");
   
   const handleProfileDialogClose = () =>
   {
@@ -111,9 +115,17 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   };
 
   const handleDownload = async () => {
-    try {
-      if (typeof bill === "undefined") return;
 
+    if (typeof bill === "undefined") return;
+    if(!bill.fileExist)
+    {
+      setAlertMessage("Sąskaita neturi failo.");
+      setAlertTitle("Failo peržiūra.");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
       const result = await getFile(bill.id, "bill");
       
       if(result === null) return;
@@ -130,9 +142,17 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   };
 
   const handleFileUpload = async () => {
-    try {
-      if (typeof file === "undefined" || typeof bill === "undefined") return;
+    if(typeof bill === "undefined") return;
 
+    if (typeof file === "undefined") 
+    {
+      setAlertMessage("Failas nepasirinktas.");
+      setAlertTitle("Failo įkėlimas.");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
       let uploadFile: FileModel = {
         fileName: "",
         id: bill.id,
@@ -154,8 +174,18 @@ const BillForm: React.FC<BillFormProps> = (props) => {
   };
 
   const handleFileRemove = async () => {
+
+    if (typeof bill === "undefined") return;
+    
+    if(!bill.fileExist)
+    {
+      setAlertMessage("Sąskaita neturi failo.");
+      setAlertTitle("Failo trinimas.");
+      setShowAlert(true);
+      return;
+    }
+
     try {
-      if (typeof bill === "undefined") return;
       await removeFile(bill?.id, "bill");
       setDeleteOccur(true);
       setFileDeleted(true);
@@ -237,6 +267,10 @@ const BillForm: React.FC<BillFormProps> = (props) => {
     setEndDate(event.target.value);
   };
 
+  const handleAlerClose = () => {
+    setShowAlert(false);
+  }
+
   return (
     <div>
       <Grid
@@ -245,6 +279,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
         alignSelf={"center"}
         sx={{ marginTop: 2, marginLeft: 15, marginBottom: 10 }}
       >
+        {showAlert ? (<AlertDialog message={alertMessage} handleClose={handleAlerClose} open={showAlert} title={alertTitle}></AlertDialog>) : (<></>)}
         <Grid item xs={4} md={4} sx={{ marginLeft: ( props.user.userType === "tenant" ? 15 : 0 )}}>
           {openProfileDialog ? (<ProfileDialog user={targetUser} openDialog={openProfileDialog} setOpenDialogClose={handleProfileDialogClose} ></ProfileDialog>) : (<></>) }
           <Box
@@ -457,7 +492,7 @@ const BillForm: React.FC<BillFormProps> = (props) => {
           > 
           <Grid container direction="column" alignItems={"left"} spacing={1}>
           <Typography variant="h6" component="div" gutterBottom>
-                Įkelti sąskaitą
+                Įkelti sąskaitos failą
               </Typography>
               <Grid item>
                 <input
