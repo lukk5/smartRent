@@ -33,6 +33,7 @@ import { addFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
 import { isDate } from "../../../utils/validator";
 import { translateBillTypeToEn } from "../../../utils/translator";
+import AlertDialog from "../others/alertDialog";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -70,6 +71,9 @@ const BillComponent: React.FC<UserProp> = (props) => {
   const [currency, setCurrency] = useState<string>("");
   const [hasError, setHasError] = useState<boolean>(false);
   const [billType, setBillType] = useState<string>("");
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertTitle, setAlertTitle] = useState<string>("");
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
   let navigate = useNavigate();
@@ -262,7 +266,17 @@ const BillComponent: React.FC<UserProp> = (props) => {
   };
 
   const handleRemove = async () => {
+
     setOpenDialogRemove(false);
+
+    if(selected.length === 0)
+    {
+      setAlertMessage("Būtina pasirinkti bent vieną sąskaitą trinimui.")
+      setAlertTitle("Sąskaitos trinimas.")
+      setShowAlert(true);
+      return;
+    }
+
     try {
       selected.forEach(async (item) => {
         await removeBill(item);
@@ -316,6 +330,11 @@ const BillComponent: React.FC<UserProp> = (props) => {
 
   const validateInput = () => {};
 
+  const handleAlertClose = () => 
+  {
+    setShowAlert(false);
+  }
+
   return (
     <div>
       <Grid
@@ -325,6 +344,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
         direction={"column"}
         sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15 }}
       >
+        {showAlert ? (<AlertDialog message={alertMessage} handleClose={handleAlertClose} open={showAlert} title={alertTitle}></AlertDialog>) : (<></>)}
         {props.user?.userType !== "tenant" ? (
           <Grid
             container
@@ -352,7 +372,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
                     setOpenDialog(true);
                   }}
                 >
-                  Sukurti sąskaita
+                  Sukurti sąskaitą
                 </Button>
                 <Button
                   sx={{ marginLeft: 2, backgroundColor: "red" }}
@@ -581,11 +601,11 @@ const BillComponent: React.FC<UserProp> = (props) => {
             aria-describedby="alert-dialog-description"
           >
             <DialogTitle id="alert-dialog-title">
-              {"Sąskaitos trinimas"}
+              {"Sąskaitų trinimas."}
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Ar tikrai norite ištrinti sąskaitą?
+                Ar tikrai norite ištrinti sąskaitą/as?
               </DialogContentText>
             </DialogContent>
             <DialogActions>

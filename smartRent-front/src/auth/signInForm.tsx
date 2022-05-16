@@ -10,12 +10,12 @@ import { getUserById } from "../service/userService";
 
 
 const logInDataTenant = {
-  name: "lukastestas2",
+  name: "JonasNuomininkas",
   password: "Zxcvbnm<>123"
 }
 
 const logInDataLandLord = {
-  name: "lukBoss",
+  name: "nuomotojasTestas",
   password: "Zxcvbnm<>123"
 }
 
@@ -67,8 +67,8 @@ const SignInForm: React.FC<LoginProp> = (props) => {
       // mock user login
 
       const loginUser: LoginUserBody = {
-        nickName: logInDataLandLord.name,
-        password: logInDataLandLord.password,
+        nickName: logInDataTenant.name,
+        password: logInDataTenant.password,
       };
 
       // const loginUser: LoginUserBody = {

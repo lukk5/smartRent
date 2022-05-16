@@ -34,6 +34,7 @@ import { timeout } from "../../../utils/timeout";
 import RentObjectsTable from "./rentObjectTable";
 import { v4 as uuidv4 } from "uuid";
 import { getAllTenants } from "../../../service/userService";
+import AlertDialog from "../others/alertDialog";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -75,6 +76,9 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
   const [tenants, setTenants] = useState<User[]>([]);
   const [startingDate, setStartingDate] = useState<string>("");
   const [endingDate, setEndingDate] = useState<string>("");
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertTitle, setAlertTitle] = useState<string>("");
 
   useEffect(() => {
     let result: [string, string][] = [];
@@ -198,7 +202,20 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
   };
 
   const handleRemove = async () => {
+    
+    setOpenConfirmDialog(false);
+
+    if(selected.length === 0)
+    {
+      setAlertMessage("Būtina pasirinkti bent vieną nuomos objektą.");
+      setAlertTitle("Nuomos objekto trinimas.");
+      setShowAlert(true);
+      return;
+    }
+
     setRemoveOccur(true);
+    
+
     try {
       selected.forEach(async (item) => {
         await deleteRentObjectById(item);
@@ -316,6 +333,11 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     }
   };
 
+  const handleAlertClose = () => 
+  {
+    setShowAlert(false);
+  }
+
   return (
     <Grid
       container
@@ -324,6 +346,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
       justifyContent="center"
       sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15 }}
     >
+       {showAlert ? (<AlertDialog message={alertMessage} handleClose={handleAlertClose} open={showAlert} title={alertTitle}></AlertDialog>) : (<></>)}
       <Grid item xs={6} md={4} sx={{ marginRight: 45, marginBottom: 1 }}>
         <Box
           sx={{

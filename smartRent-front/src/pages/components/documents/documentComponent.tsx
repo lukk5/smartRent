@@ -34,6 +34,7 @@ import { v4 as uuidv4 } from "uuid";
 import DocumentTable from "./documentTable";
 import { addFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
+import AlertDialog from "../others/alertDialog";
 
 
 const ITEM_HEIGHT = 48;
@@ -75,6 +76,9 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
   const [selectedRentObjectId, setSelectedRentObjectId] = useState<string>("");
   const [rentObjects, setRentObjects] = useState<RentObject[]>([]);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertTitle, setAlertTitle] = useState<string>("");
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
   let navigate = useNavigate();
@@ -190,6 +194,15 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
 
   const handleRemove = async () => {
     setConfirmDialogOpen(false);
+
+    if(selected.length === 0)
+    {
+      setAlertMessage("Būtiną pasirinkti bent vieną dokumentą.");
+      setAlertTitle("Dokumentų trinimas.");
+      setShowAlert(true);
+      return;
+    }
+
     try{
 
       selected.forEach(async(id)=> 
@@ -273,6 +286,11 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
     setName(event.target.value);
   };
 
+  const handleAlertClose = () =>
+  {
+    setShowAlert(false);
+  }
+
   return (
     <div>
       <Grid
@@ -283,6 +301,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
         spacing={2}
         sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 12}}
       >
+        {showAlert ? (<AlertDialog message={alertMessage} handleClose={handleAlertClose} open={showAlert} title={alertTitle}></AlertDialog>) : (<></>)}
        <Grid item xs={4}>
           {props.user.userType !== "tenant" ? 
           <Grid

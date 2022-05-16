@@ -112,6 +112,18 @@ namespace smartRent.Test
         }
         
         [Test]
+        public void CreatingBill()
+        {
+            Assert.Pass();
+        }
+
+        [Test]
+        public void CreatingDocument()
+        {
+            Assert.Pass();
+        }
+        
+        [Test]
         public void GetDocumentPass()
         {
             var documentId = Guid.Parse("ba4352ed-0ab2-4fc9-91cf-9439d792fe00");

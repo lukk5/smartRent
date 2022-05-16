@@ -31,7 +31,7 @@ import {
   translateDocumentTypeToEn,
   translateDocumentTypeToLt,
 } from "../../../utils/translator";
-
+import AlertDialog from "../others/alertDialog";
 
 interface DocumentFormProps {
   user: User;
@@ -51,6 +51,9 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   const [deleteOccur, setDeleteOccur] = useState<boolean>(false);
   const [updateOccur, setUpdateOccur] = useState<boolean>(false);
   const [uploadOccur, setUploadOccur] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertTitle, setAlertTitle] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +79,13 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
 
       const result = await getFile(documentModel.id, "document");
 
-      if (result === null) return;
+      if (result === null) 
+      {
+        setAlertMessage("Dokumentas neturi failo.");
+        setAlertTitle("Dokumento failo peržiūra.");
+        setShowAlert(true);
+        return;
+      }
 
       DownloadFile(result.file, result.fileName);
     } catch (error: any) {}
@@ -90,7 +99,14 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   const handleConfirm = async () => {
     try {
       if (typeof documentModel === "undefined") return;
-      if (typeof file === "undefined") return;
+      if (typeof file === "undefined") 
+      {
+        setOpenDialog(false);
+        setAlertMessage("Nėra pasirinktas joks failas.");
+        setAlertTitle("Dokumento failas.");
+        setShowAlert(true);
+        return;
+      }
 
       let documentUpdate: DocumentModel = {
         body: undefined,
@@ -129,6 +145,11 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
     setType(event.target.value);
   };
 
+  const handleAlertClose = () =>
+  {
+    setShowAlert(false);
+  }
+
   return (
     <div>
       <Grid
@@ -137,7 +158,25 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
         alignSelf={"center"}
         sx={{ marginTop: 2, marginLeft: 15, marginBottom: 10 }}
       >
-        <Grid item xs={4} md={4} sx={{ marginRight:  0 , marginLeft: props.user.userType !== "tenant" ? 0 : 45}}>
+        {showAlert ? (
+          <AlertDialog
+            message={alertMessage}
+            handleClose={handleAlertClose}
+            open={showAlert}
+            title={alertTitle}
+          ></AlertDialog>
+        ) : (
+          <></>
+        )}
+        <Grid
+          item
+          xs={4}
+          md={4}
+          sx={{
+            marginRight: 0,
+            marginLeft: props.user.userType !== "tenant" ? 0 : 45,
+          }}
+        >
           <Box
             sx={{
               width: 400,
@@ -182,107 +221,113 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
             </Grid>
           </Box>
         </Grid>
-        {props.user.userType !== "tenant" ? (  <Grid item xs={4} md={4} sx={{ marginLeft: 0 }}>
-          <Box
-            sx={{
-              width: 400,
-              height: 410,
-              borderRadius: 5,
-              p: 2,
-              border: 0,
-              borderColor: "#646BF5",
-              boxShadow: 5,
-            }}
-          >
-            <Grid
-              container
-              spacing={2}
-              direction="column"
-              sx={{ maxHeight: 500 }}
+        {props.user.userType !== "tenant" ? (
+          <Grid item xs={4} md={4} sx={{ marginLeft: 0 }}>
+            <Box
+              sx={{
+                width: 400,
+                height: 410,
+                borderRadius: 5,
+                p: 2,
+                border: 0,
+                borderColor: "#646BF5",
+                boxShadow: 5,
+              }}
             >
-              <Grid item xs={6} md={4}>
-                <Typography variant="h5" component="div" gutterBottom>
-                  Keisti dokumento duomenis
-                </Typography>
-                <InputLabel>Dokumento tipas</InputLabel>
-                <Select
-                  labelId="demo-simple-select-autowidth-label"
-                  id="demo-simple-select-autowidth"
-                  value={type}
-                  onChange={handleTypeChange}
-                  autoWidth
-                  sx={{ maxHeight: 50, maxWidth: 300 }}
-                >
-                  <MenuItem value={"Sutartis"} selected={true}>
-                    Sutartis
-                  </MenuItem>
-                  <MenuItem value={"Inventorizacija"}>Inventorizacija</MenuItem>
-                  <MenuItem value={"Kita"}>Kita</MenuItem>
-                </Select>
+              <Grid
+                container
+                spacing={2}
+                direction="column"
+                sx={{ maxHeight: 500 }}
+              >
+                <Grid item xs={6} md={4}>
+                  <Typography variant="h5" component="div" gutterBottom>
+                    Keisti dokumento duomenis
+                  </Typography>
+                  <InputLabel>Dokumento tipas</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-autowidth-label"
+                    id="demo-simple-select-autowidth"
+                    value={type}
+                    onChange={handleTypeChange}
+                    autoWidth
+                    sx={{ maxHeight: 50, maxWidth: 300 }}
+                  >
+                    <MenuItem value={"Sutartis"} selected={true}>
+                      Sutartis
+                    </MenuItem>
+                    <MenuItem value={"Inventorizacija"}>
+                      Inventorizacija
+                    </MenuItem>
+                    <MenuItem value={"Kita"}>Kita</MenuItem>
+                  </Select>
+                </Grid>
+                <Grid item xs={6} md={4}>
+                  <TextField
+                    name="title"
+                    label="Aprašymas"
+                    maxRows={5}
+                    minRows={5}
+                    onChange={handleTitleChange}
+                    multiline
+                    value={title}
+                    sx={{
+                      minWidth: 400,
+                      maxWidth: 400,
+                      minHeight: 160,
+                      maxHeight: 160,
+                    }}
+                  ></TextField>
+                  <InputLabel sx={{ marginBottom: 2 }}>
+                    Dokumento įkėlimas
+                  </InputLabel>
+                  <input type="file" onChange={handleFileSelect} />
+                </Grid>
+                <Grid item xs={12} md={8}>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setOpenDialog(true);
+                    }}
+                  >
+                    Atnaujinti duomenis
+                  </Button>
+                  <Dialog
+                    open={openDialog}
+                    onClose={() => {
+                      setOpenDialog(false);
+                    }}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">
+                      {"Sąskaitos duomenų keitimas"}
+                    </DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="alert-dialog-description">
+                        Ar tikrai norite pakeisti sąskaitos duomenis?
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleConfirm} autoFocus>
+                        Patvirtinti{" "}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setOpenDialog(false);
+                        }}
+                      >
+                        Atšaukti
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Grid>
               </Grid>
-              <Grid item xs={6} md={4}>
-                <TextField
-                  name="title"
-                  label="Aprašymas"
-                  maxRows={5}
-                  minRows={5}
-                  onChange={handleTitleChange}
-                  multiline
-                  value={title}
-                  sx={{
-                    minWidth: 400,
-                    maxWidth: 400,
-                    minHeight: 160,
-                    maxHeight: 160,
-                  }}
-                ></TextField>
-                <InputLabel sx={{ marginBottom: 2 }}>
-                  Dokumento įkėlimas
-                </InputLabel>
-                <input type="file" onChange={handleFileSelect} />
-              </Grid>
-              <Grid item xs={12} md={8}>
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    setOpenDialog(true);
-                  }}
-                >
-                  Atnaujinti duomenis
-                </Button>
-                <Dialog
-                  open={openDialog}
-                  onClose={() => {
-                    setOpenDialog(false);
-                  }}
-                  aria-labelledby="alert-dialog-title"
-                  aria-describedby="alert-dialog-description"
-                >
-                  <DialogTitle id="alert-dialog-title">
-                    {"Sąskaitos duomenų keitimas"}
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                      Ar tikrai norite pakeisti sąskaitos duomenis?
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleConfirm} autoFocus>
-                      Patvirtinti{" "}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setOpenDialog(false);
-                      }}
-                    >
-                      Atšaukti
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </Grid>
-            </Grid>
-          </Box>
-        </Grid>) : (<></>)}
+            </Box>
+          </Grid>
+        ) : (
+          <></>
+        )}
         <Grid item xs={4} md={4}>
           <Box
             sx={{
