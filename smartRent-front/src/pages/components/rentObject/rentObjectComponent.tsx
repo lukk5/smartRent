@@ -92,8 +92,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     setAllRentObjects(result);
   }, [rentObjects]);
 
-
-  useEffect(()=> {
+  useEffect(() => {
     let result: [string, string][] = [];
 
     if (rentObjects === null) return;
@@ -102,7 +101,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
       result.push([item.id, item.nickName]);
     });
     setAllTenants(result);
-  },[tenants]);
+  }, [tenants]);
 
   useEffect(() => {
     if (allTenants.length === 0) return;
@@ -171,14 +170,18 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
   useEffect(() => {
     fetchRentObjects();
     fetchTenants();
-  }, []);
+  }, [props]);
 
   useEffect(() => {
     fetchRentObjects();
   }, [createSuccess]);
 
   useEffect(() => {
-    fetchRentObjects();
+    console.log("baisiai veikia");
+    if (removeSuccess) {
+      console.log("baisiai veikia plbm");
+      fetchRentObjects();
+    }
   }, [removeSuccess]);
 
   useEffect(() => {
@@ -202,11 +205,9 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
   };
 
   const handleRemove = async () => {
-    
     setOpenConfirmDialog(false);
 
-    if(selected.length === 0)
-    {
+    if (selected.length === 0) {
       setAlertMessage("Būtina pasirinkti bent vieną nuomos objektą.");
       setAlertTitle("Nuomos objekto trinimas.");
       setShowAlert(true);
@@ -214,7 +215,6 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     }
 
     setRemoveOccur(true);
-    
 
     try {
       selected.forEach(async (item) => {
@@ -238,24 +238,21 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
   const handleCreateRent = async () => {
     setOpenDialogRent(false);
     setCreateOccur(true);
-    try 
-    {
+    try {
       let rentForCreate: Rent = {
         id: uuidv4(),
         tenantId: selectedTenantId,
         rentObjectId: selectedRentObjectId,
         startingDate: startingDate,
         endingDate: endingDate,
-        active: true
+        active: true,
       };
 
       await createRent(rentForCreate);
       setCreateSuccess(true);
       await timeout(5000);
       setCreateOccur(false);
-
-    } catch
-    {
+    } catch {
       setCreateSuccess(false);
       await timeout(5000);
       setCreateOccur(false);
@@ -292,7 +289,9 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     setCurrency(event.target.value);
   };
 
-  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStartDateChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setStartingDate(event.target.value);
   };
 
@@ -333,10 +332,9 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
     }
   };
 
-  const handleAlertClose = () => 
-  {
+  const handleAlertClose = () => {
     setShowAlert(false);
-  }
+  };
 
   return (
     <Grid
@@ -346,7 +344,16 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
       justifyContent="center"
       sx={{ margin: 1, xs: "flex", md: "none", marginLeft: 15 }}
     >
-       {showAlert ? (<AlertDialog message={alertMessage} handleClose={handleAlertClose} open={showAlert} title={alertTitle}></AlertDialog>) : (<></>)}
+      {showAlert ? (
+        <AlertDialog
+          message={alertMessage}
+          handleClose={handleAlertClose}
+          open={showAlert}
+          title={alertTitle}
+        ></AlertDialog>
+      ) : (
+        <></>
+      )}
       <Grid item xs={6} md={4} sx={{ marginRight: 45, marginBottom: 1 }}>
         <Box
           sx={{
@@ -392,7 +399,7 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
         <Box
           sx={{
             width: 960,
-            height: 800,
+            height: 700,
             borderRadius: 5,
             p: 2,
             border: 0,
@@ -407,6 +414,27 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
             handleOpen={handleOpen}
           />
         </Box>
+        {createSuccess === true && createOccur === true ? (
+          <Alert sx={{ marginTop: 2 }} severity="success">
+            Sukūrimas sėkmingas.
+          </Alert>
+        ) : (
+          <></>
+        )}
+        {removeSuccess === false && removeOccur === true ? (
+          <Alert sx={{ marginTop: 2 }} severity="error">
+            Ištrinimas nesėkmingas.
+          </Alert>
+        ) : (
+          <></>
+        )}
+        {removeSuccess === true && removeOccur === true ? (
+          <Alert sx={{ marginTop: 2 }} severity="success">
+            Ištrinimas sėkmingas.
+          </Alert>
+        ) : (
+          <></>
+        )}
       </Grid>
       <Grid item>
         {openDialog ? (
@@ -576,11 +604,19 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
                     MenuProps={MenuProps}
                     sx={{ minWidth: 180 }}
                   >
-                    {rentObjects?.map((object) => (
-                      <MenuItem key={object.id} value={object.name}>
-                        {object.name}
-                      </MenuItem>
-                    ))}
+                    {rentObjects?.map((object) => {
+                      
+                      if(object.rentExist)
+                      {
+                        return (<></>);
+                      }
+
+                      return (
+                        <MenuItem key={object.id} value={object.name}>
+                          {object.name}
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                 </Grid>
                 <Grid item xs={12}>
@@ -648,34 +684,6 @@ const RentObjectComponent: React.FC<UserProp> = (props) => {
           <></>
         )}
       </Grid>
-      {createSuccess === false && createOccur === true ? (
-        <Alert sx={{ marginTop: 25 }} severity="error">
-          Sukūrimas nesėkmingas.
-        </Alert>
-      ) : (
-        <></>
-      )}
-      {createSuccess === true && createOccur === true ? (
-        <Alert sx={{ marginTop: 25 }} severity="success">
-          Sukūrimas sėkmingas.
-        </Alert>
-      ) : (
-        <></>
-      )}
-      {removeSuccess === false && removeOccur === true ? (
-        <Alert sx={{ marginTop: 25 }} severity="error">
-          Ištrinimas nesėkmingas.
-        </Alert>
-      ) : (
-        <></>
-      )}
-      {removeSuccess === true && removeOccur === true ? (
-        <Alert sx={{ marginTop: 25 }} severity="success">
-          Ištrinimas sėkmingas.
-        </Alert>
-      ) : (
-        <></>
-      )}
       <Dialog
         open={openConfirmDialog}
         onClose={() => {

@@ -66,7 +66,7 @@ export const LandLordDashBoard = (props: DashBoardProps) => {
         <Box
           sx={{
             width: 620,
-            height: 300,
+            height: 400,
             borderRadius: 5,
             p: 2,
             border: 0,
@@ -78,7 +78,7 @@ export const LandLordDashBoard = (props: DashBoardProps) => {
             <Typography variant="body1" component="div" gutterBottom>
               Vėluojamos apmokėti sąskaitos
             </Typography>
-            <Table sx={{ minWidth: 450 }} aria-label="simple table">
+            <Table sx={{ minWidth: 450, maxHeight: 280 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
                   <TableCell align="left">Pavadinimas</TableCell>

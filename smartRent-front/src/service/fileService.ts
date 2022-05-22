@@ -31,6 +31,29 @@ async function addFile(file: FileModel) {
   }
 }
 
+async function generateFile(id: string | undefined) {
+  const token = window.localStorage.getItem("token");
+
+  console.log(token);
+
+  if (token === null) {
+    throw new Error("Token not exists.");
+  }
+
+  if (typeof id === "undefined" || id === null)
+    throw new Error("Id not exists.");
+
+  const response = await axios.post(`${apiUrl}file/renderDocument/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Unsuccessful render");
+  }
+}
+
 async function getFile(
   id: string | undefined,
   type: string
@@ -84,4 +107,4 @@ async function removeFile(id: string, type: string) {
   if (response.status !== 200) throw new Error("deleting was not completed.");
 }
 
-export { addFile, getFile, removeFile };
+export { addFile, getFile, removeFile, generateFile };

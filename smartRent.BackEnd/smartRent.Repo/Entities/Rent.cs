@@ -7,6 +7,7 @@ namespace smartRent.Repo.Entities
     {
         public Guid TenantId { get; set; }
         public Guid RentObjectId { get; set; }
+        public DateTime PayDate { get; set; }
         public bool Active { get; set; }
         public DateTime StartingDate { get; set; }
         public DateTime EndingDate { get; set; }

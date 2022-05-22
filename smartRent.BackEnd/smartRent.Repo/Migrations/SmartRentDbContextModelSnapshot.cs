@@ -239,6 +239,9 @@ namespace smartRent.Repo.Migrations
                     b.Property<DateTime>("EndingDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("PayDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("RentObjectId")
                         .HasColumnType("uniqueidentifier");
 

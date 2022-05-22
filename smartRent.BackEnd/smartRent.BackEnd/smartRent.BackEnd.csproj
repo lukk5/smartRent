@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\smartRent.Repo\smartRent.Repo.csproj" />
+      <ProjectReference Include="..\smartRent.DocumentHandler\smartRent.DocumentHandler.csproj" />
     </ItemGroup>
 
 </Project>

@@ -368,18 +368,14 @@ const RentObjectForm: React.FC<RentObjectFormProps> = (props) => {
               </Grid>
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
-                  Kaina: {rentObject?.price}
+                  Kaina: {rentObject?.price} {rentObject?.currency}
                 </Typography>
               </Grid>
               <Grid item>
                 <Typography variant="h6" component="div" gutterBottom>
-                  Valiuta: {rentObject?.currency}
+                  Aprašymas: 
                 </Typography>
-              </Grid>
-              <Grid item>
-                <Typography variant="h6" component="div" gutterBottom>
-                  Aprašymas: {rentObject?.title}
-                </Typography>
+                {rentObject?.title}
               </Grid>
             </Grid>
           </Box>

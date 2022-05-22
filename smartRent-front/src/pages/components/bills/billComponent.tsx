@@ -477,11 +477,14 @@ const BillComponent: React.FC<UserProp> = (props) => {
                     MenuProps={MenuProps}
                     sx={{ minWidth: 180 }}
                   >
-                    {rentObjects.map((object) => (
-                      <MenuItem key={object.id} value={object.name}>
+                    {rentObjects.map((object) => {
+
+                      if(object.rentExist === false) return (<></>);
+
+                      return (<MenuItem key={object.id} value={object.name}>
                         {object.name}
-                      </MenuItem>
-                    ))}
+                      </MenuItem>);
+                  })}
                   </Select>
                   <InputLabel id="demo-multiple-name-label">
                     Sąskaitos tipas
@@ -555,7 +558,7 @@ const BillComponent: React.FC<UserProp> = (props) => {
           <Box
             sx={{
               width: 960,
-              height: 800,
+              height: 600,
               borderRadius: 5,
               p: 2,
               border: 0,
@@ -570,28 +573,28 @@ const BillComponent: React.FC<UserProp> = (props) => {
               handleOpen={handleOpen}
             />
           </Box>
-        </Grid>
-        <Box sx={{ align: "left", marginLeft: -25, marginTop: 15 }}>
           {createSuccess === false && createOccur === true ? (
-            <Alert severity="error">Sukūrimas nesėkmingas.</Alert>
+            <Alert severity="error" sx={{marginBottom: 25}}>Sukūrimas nesėkmingas.</Alert>
           ) : (
             <></>
           )}
           {createSuccess === true && createOccur === true ? (
-            <Alert severity="success">Sukūrimas sėkmingas.</Alert>
+            <Alert severity="success" sx={{marginBottom: 25}}>Sukūrimas sėkmingas.</Alert>
           ) : (
             <></>
           )}
           {deleteSuccess === false && deleteOccur === true ? (
-            <Alert severity="error">Ištrinimas nesėkmingas.</Alert>
+            <Alert severity="error" sx={{marginBottom: 25}}>Ištrinimas nesėkmingas.</Alert>
           ) : (
             <></>
           )}
           {deleteSuccess === true && deleteOccur === true ? (
-            <Alert severity="success">Ištrinimas sėkmingas.</Alert>
+            <Alert severity="success" sx={{marginBottom: 25}}>Ištrinimas sėkmingas.</Alert>
           ) : (
             <></>
           )}
+        </Grid>
+        <Box sx={{ align: "left", marginLeft: -25, marginTop: 15 }}>
           <Dialog
             open={openDialogRemove}
             onClose={() => {

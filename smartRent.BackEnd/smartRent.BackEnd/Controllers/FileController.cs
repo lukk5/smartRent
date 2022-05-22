@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using smartRent.BackEnd.Domain.Models;
 using smartRent.BackEnd.Utils;
+using smartRent.DocumentHandler;
 using smartRent.Repo.Entities;
 using smartRent.Repo.RepoInterfaces;
 using smartRent.Repo.Utils;
@@ -17,15 +20,62 @@ namespace smartRent.BackEnd.Controllers
         private readonly IFileRepository _fileRepository;
         private readonly IRepository<Bills> _billRepository;
         private readonly IRepository<Document> _documentRepository;
+        private readonly IRepository<RentObject> _rentObjectRepository;
+        private readonly IRepository<Rent> _rentRepository;
+        private readonly IRepository<Tenant> _tentRepository;
+        private readonly IRepository<LandLord> _landLordRepository;
+
 
         public FileController(IFileRepository fileRepository, IRepository<Document> documentRepository,
-            IRepository<Bills> billRepository)
+            IRepository<Bills> billRepository, IRepository<RentObject> rentObjectRepository, IRepository<Rent> rentRepository, IRepository<Tenant> tentRepository, IRepository<LandLord> landLordRepository)
         {
             _fileRepository = fileRepository;
             _documentRepository = documentRepository;
             _billRepository = billRepository;
+            _rentObjectRepository = rentObjectRepository;
+            _rentRepository = rentRepository;
+            _tentRepository = tentRepository;
+            _landLordRepository = landLordRepository;
         }
-        
+
+        [HttpPost]
+        [Route("renderDocument/{id}")]
+        public async Task<IActionResult> RenderDocument([FromRoute] string id)
+        {
+            var document = await _documentRepository.GetByIdAsync(Guid.Parse(id));
+
+            if (document is null) return NotFound();
+
+            var rentObject = await _rentObjectRepository.GetByIdAsync(document.RentObjectId);
+            var rents = await _rentRepository.GetAllAsync();
+
+            var targetRent = rents.SingleOrDefault(x => x.Active && x.RentObjectId == rentObject.Id);
+
+            var tenant = await _tentRepository.GetByIdAsync(targetRent.TenantId);
+            var landLord = await _landLordRepository.GetByIdAsync(rentObject.LandLordId);
+
+            var documentHanlder = new HandleDocument();
+
+            var fileName = document.Name + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
+
+            documentHanlder.FillDocument( new ()
+            {
+                Address = rentObject.Address,
+                Price = rentObject.Price.ToString(CultureInfo.InvariantCulture),
+                TenantName = tenant.Name + " " + tenant.LastName,
+                LandLordName = landLord.Name + " " + landLord.LastName,
+                DocumentNr = document.Id.ToString()[..4],
+                Date1 = document.CreatedAt.Year.ToString(),
+                Date2 = document.CreatedAt.Month.ToString(),
+                Date3 = document.CreatedAt.Day.ToString(),
+                Date1Payment = targetRent.PayDate.Day.ToString(),
+                Dimensions = rentObject.Dimensions.ToString(CultureInfo.InvariantCulture)
+            },fileName);
+
+            document.UniqueFileName = fileName;
+            await _documentRepository.UpdateAsync(document);
+            return Ok();
+        }
         
         
         [HttpGet]

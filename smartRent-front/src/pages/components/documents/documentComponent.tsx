@@ -14,6 +14,7 @@ import {
   SelectChangeEvent,
   Theme,
   Alert,
+  Checkbox,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +33,7 @@ import {
 import { getRentObjectsListByLandLordId } from "../../../service/rentObjectService";
 import { v4 as uuidv4 } from "uuid";
 import DocumentTable from "./documentTable";
-import { addFile } from "../../../service/fileService";
+import { addFile, generateFile } from "../../../service/fileService";
 import { FileModel } from "../../../models/fileModel";
 import AlertDialog from "../others/alertDialog";
 
@@ -47,6 +48,8 @@ const MenuProps = {
     },
   },
 };
+
+const label = { inputProps: { 'aria-label': 'Sugen' } };
 
 function timeout(delay: number) {
   return new Promise((res) => setTimeout(res, delay));
@@ -79,6 +82,7 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertTitle, setAlertTitle] = useState<string>("");
+  const [generateDocument, setGenerateDocument] = useState<boolean>(false);
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
   let navigate = useNavigate();
@@ -254,7 +258,10 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
 
       let result = await createDocument(document);
 
-      if (typeof file !== "undefined") {
+      if(generateDocument)
+      {
+        await generateFile(id);
+      } else if (typeof file !== "undefined") {
         let documentFile: FileModel = {
           id: id,
           file: file,
@@ -290,6 +297,10 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
   {
     setShowAlert(false);
   }
+
+  const handleGenerate = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setGenerateDocument(event.target.checked);
+  };
 
   return (
     <div>
@@ -456,6 +467,12 @@ const DocumentComponent: React.FC<DocumentProps> = (props) => {
                     </Grid>
                     <Grid item sx={{ marginTop: 2 }}>
                       <input type="file" onChange={handleFileSelect}></input>
+                    </Grid>
+                    <Grid item sx={{ marginTop: 2 }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Dokumento sugeneravimas
+                      </InputLabel>
+                      <Checkbox onChange={handleGenerate} value={generateDocument}/>
                     </Grid>
                   </Grid>
                 </Grid>

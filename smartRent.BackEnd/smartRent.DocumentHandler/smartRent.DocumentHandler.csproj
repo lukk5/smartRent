@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GrapeCity.Documents.Word" Version="5.1.0.791" />
+    <PackageReference Include="GrapeCity.Documents.Word.Layout" Version="5.1.0.791" />
+    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\smartRent.Repo\smartRent.Repo.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -59,16 +59,15 @@ const SignInForm: React.FC<LoginProp> = (props) => {
   };
 
   const loginSubmit = async () => {
-
-    setLoginOccur(true);
-
     try {
 
       // mock user login
 
+      console.log("testas");
+
       const loginUser: LoginUserBody = {
-        nickName: logInDataTenant.name,
-        password: logInDataTenant.password,
+        nickName: logInDataLandLord.name,
+        password: logInDataLandLord.password,
       };
 
       // const loginUser: LoginUserBody = {
@@ -87,6 +86,7 @@ const SignInForm: React.FC<LoginProp> = (props) => {
       }
 
       setLoginSuccess(true);
+      setLoginOccur(true);
 
       await timeout(3000);
 

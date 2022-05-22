@@ -45,8 +45,6 @@ function App() {
     window.localStorage.setItem("user", userString);
 
     setUser(user);
-
-    
   };
 
   const cacheToken = (auth: UserAuthResponse) => {
@@ -131,14 +129,6 @@ function App() {
               updateUser={handleUserUpdate}
               logOut={logOut}
             />
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <main style={{ padding: "1rem" }}>
-              <p>There's nothing here!</p>
-            </main>
           }
         />
         <Route

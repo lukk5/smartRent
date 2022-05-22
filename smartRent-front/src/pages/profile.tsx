@@ -327,8 +327,8 @@ const Profile: React.FC<UserProp> = (props) => {
 
   return (
     <div>
-      <Grid container sx={{ margin: 5 }}>
-        <Grid item xs={6} md={4} sx={{ marginRight: -10, marginLeft: 45 }}>
+      <Grid container spacing={2} sx={{ margin: 5 }}>
+        <Grid item xs={6} md={4} sx={{  marginLeft: 25 }}>
           <Box
             sx={{
               width: 400,

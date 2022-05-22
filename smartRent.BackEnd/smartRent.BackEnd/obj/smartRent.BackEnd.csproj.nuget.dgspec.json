@@ -28,8 +28,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.Repo\\smartRent.Repo.csproj": {
-                "projectPath": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.Repo\\smartRent.Repo.csproj"
+              "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\smartRent.DocumentHandler.csproj": {
+                "projectPath": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\smartRent.DocumentHandler.csproj"
               }
             }
           }
@@ -71,6 +71,78 @@
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
             },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.104\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\smartRent.DocumentHandler.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\smartRent.DocumentHandler.csproj",
+        "projectName": "smartRent.DocumentHandler",
+        "projectPath": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\smartRent.DocumentHandler.csproj",
+        "packagesPath": "C:\\Users\\lukas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.DocumentHandler\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\lukas\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.Repo\\smartRent.Repo.csproj": {
+                "projectPath": "C:\\Users\\lukas\\source\\repos\\bakis\\smartRent\\smartRent.BackEnd\\smartRent.Repo\\smartRent.Repo.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "GrapeCity.Documents.Word": {
+              "target": "Package",
+              "version": "[5.1.0.791, )"
+            },
+            "GrapeCity.Documents.Word.Layout": {
+              "target": "Package",
+              "version": "[5.1.0.791, )"
+            },
+            "Microsoft.Office.Interop.Word": {
+              "target": "Package",
+              "version": "[15.0.4797.1003, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

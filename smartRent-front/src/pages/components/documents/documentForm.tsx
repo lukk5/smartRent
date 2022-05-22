@@ -24,7 +24,7 @@ import {
   getDocumentById,
   updateDocument,
 } from "../../../service/documentService";
-import { getFile } from "../../../service/fileService";
+import { generateFile, getFile } from "../../../service/fileService";
 import { DownloadFile } from "../../../utils/fileDownloader";
 import { timeout } from "../../../utils/timeout";
 import {
@@ -51,6 +51,8 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   const [deleteOccur, setDeleteOccur] = useState<boolean>(false);
   const [updateOccur, setUpdateOccur] = useState<boolean>(false);
   const [uploadOccur, setUploadOccur] = useState<boolean>(false);
+  const [renderOccur, setRenderOccur] = useState<boolean>(false);
+  const [renderSuccess, setRenderSuccess] = useState<boolean>(false);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertTitle, setAlertTitle] = useState<string>("");
@@ -79,8 +81,7 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
 
       const result = await getFile(documentModel.id, "document");
 
-      if (result === null) 
-      {
+      if (result === null) {
         setAlertMessage("Dokumentas neturi failo.");
         setAlertTitle("Dokumento failo peržiūra.");
         setShowAlert(true);
@@ -99,8 +100,7 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
   const handleConfirm = async () => {
     try {
       if (typeof documentModel === "undefined") return;
-      if (typeof file === "undefined") 
-      {
+      if (typeof file === "undefined") {
         setOpenDialog(false);
         setAlertMessage("Nėra pasirinktas joks failas.");
         setAlertTitle("Dokumento failas.");
@@ -137,6 +137,25 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
     }
   };
 
+  const handleGenerate = async() =>
+  {
+    try 
+    {
+      await generateFile(id);
+      setRenderOccur(true);
+      setRenderSuccess(true);
+      await timeout(5000);
+      setRenderOccur(false);
+
+    } catch(error: any)
+    {
+      setRenderOccur(true);
+      setRenderSuccess(false);
+      await timeout(5000);
+      setRenderOccur(false);
+    }
+  };
+
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
   };
@@ -145,10 +164,9 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
     setType(event.target.value);
   };
 
-  const handleAlertClose = () =>
-  {
+  const handleAlertClose = () => {
     setShowAlert(false);
-  }
+  };
 
   return (
     <div>
@@ -332,7 +350,7 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
           <Box
             sx={{
               width: 200,
-              height: 100,
+              height: 120,
               borderRadius: 5,
               p: 2,
               border: 0,
@@ -349,6 +367,11 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
               <Grid item>
                 <Button variant="contained" onClick={handleDownload}>
                   Peržiūrėti PDF
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button variant="contained" onClick={handleGenerate}>
+                  Sugeneruoti PDF
                 </Button>
               </Grid>
             </Grid>
@@ -382,6 +405,16 @@ const DocumentForm: React.FC<DocumentFormProps> = (props) => {
       )}
       {uploadSuccess === true && uploadOccur === true ? (
         <Alert severity="success">Įkėlimas sėkmingas.</Alert>
+      ) : (
+        <></>
+      )}
+       {renderSuccess === false && renderOccur === true ? (
+        <Alert severity="error">Sugeneravimas nesėkmingas.</Alert>
+      ) : (
+        <></>
+      )}
+      {renderSuccess === true && renderOccur === true ? (
+        <Alert severity="success">Sugeneravimas sėkmingas.</Alert>
       ) : (
         <></>
       )}
